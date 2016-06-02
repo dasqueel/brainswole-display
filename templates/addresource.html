@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<html>
+<table width="300" align="center" cellpadding="0" cellspacing="1">
+
+<tr>
+<form name="addresource" method="post" action="../back/addresource">
+<input type="hidden" name="concept" value="{{concept}}" />
+<td>
+
+<table width="100%" border="0" cellpadding="3" cellspacing="1" bgcolor="#FFFFFF">
+
+<tr>
+<td colspan="3"><strong><center>Add {{ concept }} resource</center></strong></td>
+</tr>
+
+<tr>
+<td width="78">url</td>
+<td width="6">:</td>
+<td width="294"><input name="url" type="text" id="url"></td>
+</tr>
+
+</table>
+
+<br>
+<br>
+<p>if an youtube video and the concept is explained in a certain section video</p>
+<p>add the start and end times of the concept</p>
+
+<table width="100%" border="0" cellpadding="3" cellspacing="1" bgcolor="#FFFFFF">
+
+	<tr>
+	<td width="78">youtube start</td>
+	<td width="6">:</td>
+	<td width="294"><input name="youtubeStart" type="text" id="youtubeStart" placeholder="e.x. : 7:01"></td>
+	</tr>
+
+	<tr>
+	<td width="78">youtube end</td>
+	<td width="6">:</td>
+	<td width="294"><input name="youtubeEnd" type="text" id="youtubeEnd" placeholder="e.x. : 8:15"></td>
+	</tr>
+
+	<tr>
+	<td></td>
+	<td></td>
+	<td><input type="submit" name="submit" value="add resource"></td>
+	</tr>
+
+</table>
+
+</td>
+</form>
+</tr>
+</table>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+  <ul class=flashes>
+  {% for message in messages %}
+    <li>{{ message }}</li>
+  {% endfor %}
+  </ul>
+{% endif %}
+{% endwith %}
+
+{% if error: %}
+{{error}}
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div align='center'>
+
+	<h1>Add:</h1>
+	{% for prov in providers %}
+	{{ prov['name'] }}   <button value="{{ prov['varName'] }}">Import</button><br>
+	{% endfor %}
+
+	<h1>Already added</h1>
+	{% for imprt in imported %}
+	{{ imprt['name'] }}   <button value="{{ imprt['varName'] }}">Update</button><br>
+	{% endfor %}
+
+	<button id='test'>test</button>
+</div>
+
+<script type="text/javascript">
+
+$( "button" ).click(function() {
+	var provider = $(this).val();
+	//$.post("accesstoken", {'provider': provider});
+	window.location.href = "accesstoken?provider="+provider;
+});
+
+$( "#test" ).click(function() {
+	$.post("test");
+});
+
+
+</script>
+
+{% endblock %}

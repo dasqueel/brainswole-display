@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div align='center'>
+
+	<p>{{ prob['question'] }}</p>
+	<br>
+	<p>{{ prob['data'] }}</p>
+
+	<input type="text" name="usersAnswer" id="usersAnswer">
+	<button onclick="checkAnswer()">check</button>
+
+	<p id="demo"></p>
+	<br>
+</div>
+
+<script>
+function checkAnswer() {
+    //var answer = {{ prob['answer'] }};
+    var answerList = {{ prob['answerList']|safe }};
+    var probId = "{{ prob['id'] }}";
+    var concept = "{{ prob['concept'] }}";
+    var usersAnswer = document.getElementById('usersAnswer').value;
+
+    if (jQuery.inArray(usersAnswer, answerList) != -1) {
+        document.getElementById("demo").innerHTML = 'solid work ';
+        //post outcome
+        $.post( "problem", { outcome: "correct", probId: probId, concept: concept })
+          .done(function( data ) {
+              alert( data );
+              newProblem();
+            });
+    }
+    else {
+        document.getElementById("demo").innerHTML = 'whoops try again';
+        //post outcome
+        $.post( "problem", { outcome: "incorrect", probId: probId, concept: concept })
+          .done(function( data ) {
+              alert( data );
+            });
+    }
+
+}
+
+function newProblem() {
+    location.reload();
+}
+</script>
+
+{% endblock %}

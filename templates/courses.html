@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div align="center">
+
+	<h2>Courses</h2><br>
+
+	{% for course in courses %}
+		<a href="course/{{ course }}">{{ course }}</a> <br>
+	{% endfor %}
+
+</div>
+
+{% endblock %}

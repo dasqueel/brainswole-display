@@ -1,0 +1,66 @@
+.navbar-nav {
+	width: 100%;
+	text-align: center;
+}
+.navbar-nav > li {
+	float: none;
+	display: inline-block;
+}
+.navbar-nav > li.navbar-right {
+	float: right !important;
+	margin-right: 70px;
+}
+.navbar-nav > li.navbar-left {
+	float: left !important;
+	margin-left: 70px;
+}
+
+td {
+    padding-top: .5em;
+    padding-bottom: .5em;
+}
+
+#title {
+	width:600px;
+}
+
+#likeButton {
+	padding-right: 13px;
+	width: 20px;
+}
+
+#likesSpace {
+	padding-right: 13px;
+}
+
+.likeBtn {
+	width:52px;
+}
+
+.archiveBtn {
+	width:78px;
+}
+
+/* import data */
+#importdiv {
+	margin: 0 auto;
+	width: 20%;
+	margin-bottom: 60px;
+}
+
+.importupdate {
+	float: right;
+	display:inline;
+}
+
+#importprov {
+	length: 20px;
+}
+
+/* concept */
+
+#addlink {
+	position:absolute;
+	right: 0;
+	padding-right: 120px;
+}

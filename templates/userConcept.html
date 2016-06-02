@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div align='center'>
+<p>{{ current_user.firstName }}'s {{ concept }} experience</p>
+
+<h2>Explanations used</h2>
+{% for link in expllinks %}
+
+<a href="http://{{ link['url'] }}" target='_blank'>{{ link['title'] }}</a><br>
+
+{% endfor %}
+
+<br>
+<br>
+
+<h2>Practice experience</h2>
+{% for link in practlinks %}
+
+<a href="http://{{ link['url'] }}" target='_blank'>{{ link['title'] }} || correct: {{link['probsCorrect']}} attempted: {{link['probsAttempted']}}</a><br>
+
+{% endfor %}
+
+</div>
+
+
+{% endblock %}

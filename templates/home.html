@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+</head>
+
+{% block content %}
+
+<div align='center'>
+	What would you like to learn about?<br><br><br>
+	<input type="text" id="queryText" size="35">
+	<button>Search</button>
+</div>
+
+<script type="text/javascript">
+
+$( "button" ).click(function() {
+	var query = $("#queryText").val();
+	window.location = "concept/"+query
+});
+
+</script>
+{% endblock %}

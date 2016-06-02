@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h1 align="center">Add</h1>
+<div id='importdiv'>
+{% if providers == [] %}
+<p>added all providers</p>
+{% endif %}
+{% for prov in providers %}
+<div id="importprov"> {{ prov['name'] }}<button value="{{ prov['varName'] }}" class="importupdate">Import</button></div><br>
+{% endfor %}
+</div>
+
+<h1 align="center">Added</h1>
+<div id='importdiv'>
+{% for imprt in imported %}
+<div id="importprov">{{ imprt['name'] }}<button value="{{ imprt['varName'] }}" class="importupdate">Update</button></div><br>
+{% endfor %}
+</div>
+
+<script type="text/javascript">
+
+$( "button" ).click(function() {
+	var provider = $(this).val();
+	window.location.href = "importProvider?provider="+provider;
+	//alert(provider)
+	/*
+	$.post( "importProvider", { provider: provider })
+	  .done(function( data ) {
+	  	//$('#loading').hide();
+	    alert( data );
+	  });*/
+});
+
+</script>
+
+{% endblock %}

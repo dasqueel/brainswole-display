@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<head>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+</head>
+
+
+<div align="center">
+	<!--
+	<div id="loading">
+	  <p><img src="../static/imgs/loading.gif" />Adding Experience</p>
+	</div>
+	-->
+
+	<br>
+	<br>
+	<br>
+	<h1>Import Experience:</h1>
+	<br>
+	<a href="importProvider?provider=khan" class="post" value="khan">Khan Academy</a>
+	<br>
+	<br>
+
+</div>
+
+<script>
+/*
+$('#loading').hide();
+$(document).ready(function() {
+    $('.post').click(function() {
+    	$('#loading').show();
+        var provider = $(this).attr("value");
+        $.post( "importProvider", { provider: provider })
+          .done(function( data ) {
+          	$('#loading').hide();
+            alert( data );
+          });
+    });
+});
+*/
+</script>
+{% endblock %}

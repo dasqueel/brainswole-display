@@ -1,0 +1,54 @@
+{% if error == None %}
+
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+</head>
+
+<div align='center'>
+	<b>{{ concept }}</b>
+	<br>
+	<br>
+	<br>
+	<button onclick="getExpl()">Explanations</button>
+	<button onclick="getPract()">Practice</button>
+
+<div id='results'></div>
+</div>
+<script>
+
+function getExpl() {
+  $("#results").html('<p>Explanations</p><table style="width:40%" align="center">{% for link in linksExpl %}<tr><td width="4%">{{link['likes']}}</td>{% if link['liked']==False %}<td width="20%"><div id="likeButtonArea"><input type="button" value="like" id="{{link["urlId"]}}" name="{{link["url"]}}" onclick="postLike(this)"/></div></td>{% else %}<td width="20%"><div id="likeButtonArea"><input type="button" value="unlike" id="{{link["urlId"]}}" name="{{link["url"]}}" onclick="postLike(this)"/></div></td>{% endif %}<td><a href="http://{{link['url']}}" target="_blank">{{link['title']}}</a></td><td><button type="button">Archive</button></td></tr>{% endfor %}</table>');
+}
+
+function getPract() {
+  $("#results").html('<p>Practice</p><table style="width:40%" align="center">{% for link in linksPract %}<tr><td width="4%">{{ link["likes"] }}</td><td width="20%"><button type="button">Like!</button></td><td><a href="http://{{ link["url"] }}" target="_blank">{{ link["title"] }}</a></td><td><button type="button">Archive</button></td></tr>{% endfor %}</table>');
+}
+
+function postLike(likeUrl){
+	//get url
+    var urlId = likeUrl.id;
+    var url = likeUrl.name;
+    var concept = "{{ concept }}";
+
+    //post url to /liked to add to user urlLikes
+    $.post( "../liked", { url: url, concept: concept },function(resp) {
+    	if (resp == "successful added") {
+    		$("#"+urlId).val("unlike");
+
+    	}
+  		else {
+  			$("#"+urlId).val("like");
+  		}
+	});
+
+}
+
+</script>
+
+{% else %}
+
+<p>{{ concept }}</p>
+
+{{ error }}
+
+{% endif %}

@@ -1,0 +1,27 @@
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/style.css') }}">
+
+{% if error %}
+
+{{ error }}
+
+{% else %}
+
+<b>{{ current_user.firstName }}s {{ concept }} exeprience</b>
+
+<h1>Explanations</h1>
+{% for explLink in linksExpl %}
+
+<a href="http://{{ explLink }}" target="_blank">{{ explLink }}</a><br>
+
+{% endfor %}
+<br>
+
+<h1>Practice</h1>
+
+{% for practLink in linksPract %}
+
+<a href="http://{{ practLink }}" target="_blank"> {{ practLink }} </a><br>
+
+{% endfor %}
+
+{% endif %}

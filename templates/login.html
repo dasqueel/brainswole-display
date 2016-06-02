@@ -1,0 +1,29 @@
+<head>
+	<link rel="stylesheet" type="text/css" href="../static/css/style.css">
+</head>
+
+<div align='center'>
+
+<br>
+
+<h2>Brainswole Login</h2>
+
+<form id='login' action='login' method='POST'>
+ <input type='text' name='email' id='email' placeholder='email'></input>
+ <input type='password' name='pwd' id='pwd' placeholder='password'></input>
+ <input type='submit' name='submit' value='login'></input>
+</form>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<a href="register">Register Here</a>
+
+</div>
+{% if error: %}
+{{error}}
+{% endif %}

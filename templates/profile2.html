@@ -1,0 +1,85 @@
+<head>
+	<link rel="stylesheet" type="text/css" href="../static/css/profile.css">
+	<link rel="stylesheet" href="../static/css/dropdown.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+
+<div align="center">
+
+	<p>{{ current_user.firstName }}'s Recent Activity</p>
+	<br>
+	{% for concept in concepts %}
+	<a href="../{{current_user.userName}}/concept/{{ concept }}">{{ concept }}</a><br>
+	{% endfor %}
+
+	<br>
+	<br>
+	<br>
+
+	<select id='courseSelect' onchange='getCourse()'>
+		<option> -- select course -- </option>
+		<option value='algorithms'>algorithms</option>
+		<option value='statistics'>statistics</option>
+		<option value='probablity'>probability</option>
+	</select>
+
+</div>
+
+<div id='courseDiv'>
+
+<table id='courseTable'>
+	<tr>
+		<th>Concept</th>
+		<th id='pract'>Explanations</th>
+		<th id='pract'>Practice</th>
+	</tr>
+	{% for concept in conceptObjs %}
+	<tr>
+		<td id='concept'>{{ concept['concept'] }}</td>
+		<td id='pract'>
+
+			<div class="dropdown">
+
+			<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">{{concept['explanations']|length}}
+				<span class="caret"></span></button>
+				<ul class="dropdown-menu">
+					{% for link in concept['explanations'] %}
+					<li><a href="http://{{ link['url'] }}" target='_blank'>{{ link['title'] }}</a></li>
+					{% endfor %}
+				</ul>
+
+			</div>
+		</td>
+		<td id='pract'>
+			<div class="dropdown">
+
+			<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">{{concept['practice']|length}}
+				<span class="caret"></span></button>
+				<ul class="dropdown-menu">
+					{% for link in concept['practice'] %}
+					<li><a href="http://{{ link['url'] }}" target='_blank'>{{ link['title'] }}</a></li>
+					{% endfor %}
+				</ul>
+
+			</div>
+		</td>
+	</tr>
+	{% endfor %}
+
+</table>
+
+</div>
+
+</body>
+
+<script type="text/javascript">
+
+function getCourse() {
+	var course = $('#courseSelect').find(":selected").text();
+	$("#courseDiv")
+}
+
+</script>

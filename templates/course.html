@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div align="center">
+
+<p>{{course}}</p>
+
+{% for concept in concepts %}
+
+<a href="../concept/{{ concept }}">{{ concept }}</a> <br>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

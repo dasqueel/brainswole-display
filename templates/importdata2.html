@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div align='center'>
+
+	<h1>Add:</h1>
+	{% for prov in providers %}
+	<input type="checkbox" value="{{ prov['varName'] }}"> {{ prov['name'] }}<br>
+	{% endfor %}
+
+	<h1>Already added</h1>
+	{% for imprt in imported %}
+	<input type="checkbox" value="{{ imprt['varName'] }}"> {{ imprt['name'] }}<br>
+	{% endfor %}
+
+	<button id='send'>import data</button>
+
+</div>
+
+<script type="text/javascript">
+
+$( "#send" ).click(function() {
+	var data = [];
+	$(":checked").each(function() {
+	  data.push($(this).val());
+	});
+	//console.log(data);
+	$.post("importdata", {'data[]': data});
+});
+
+
+</script>
+
+{% endblock %}

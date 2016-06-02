@@ -1,0 +1,22 @@
+#courseTable {
+	margin: 0 auto;
+	width: 80%;
+	text-align: center;
+	table-layout: fixed;
+}
+
+#courseDiv {
+	width:80%;
+	height:100%;
+	margin: 0 auto;
+}
+
+#pract {
+	width: 40%;
+	padding: 10px;
+}
+
+#concept {
+	width: 20%;
+	padding: 10px;
+}

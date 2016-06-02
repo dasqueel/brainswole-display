@@ -1,0 +1,40 @@
+{
+	"calculus":[
+		"derivative",
+		"remann sum",
+		"fundamental theorem of calculus",
+		"taylor series",
+		"integration",
+		"limits",
+		"parametric curves",
+		"mean value theorem",
+		"product rule",
+		"l hopitals rule",
+		"quotient rule",
+		"implicit differentiation",
+		"optimization problem",
+		"integration by substitution",
+		"improper integrals"
+	],
+
+	"algorithms" : [
+		"insertion sort",
+		"mergesort",
+		"horners rule",
+		"divide and conquer",
+		"quicksort",
+		"heapsort",
+		"bucketsort",
+		"asymptotic notation",
+		"radix sort",
+		"hashing",
+		"hash functions",
+		"binary search trees",
+		"black red trees",
+		"2-3 trees",
+		"b trees",
+		"range trees",
+		"interval trees",
+		"dijkstras algorithm"
+	]
+}
