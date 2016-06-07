@@ -52,7 +52,7 @@ function postLike(likeUrl){
   var concept = "{{ concept }}";
 
     //post url to /liked to add to user urlLikes
-    $.post( "../liked", { url: url, concept: concept },function(resp) {
+    $.post( "../liked", { url: url, concept: concept, type: "concept" },function(resp) {
     	if (resp == "successful added") {
     		$("#"+urlId).val("unlike");
       }
@@ -62,23 +62,23 @@ function postLike(likeUrl){
    });
   }
 
-  function postArchive(linkUrl){
-	   //get short urlId
-    var urlId = linkUrl.id;
-    //full url
-    var url = linkUrl.name;
-    var concept = "{{ concept }}";
+function postArchive(linkUrl){
+   //get short urlId
+  var urlId = linkUrl.id;
+  //full url
+  var url = linkUrl.name;
+  var concept = "{{ concept }}";
 
-    //post url to /archived to add to user urlArchives
-    $.post( "../archived", { url: url, concept: concept },function(resp) {
-    	if (resp == "successful added") {
-    		$("#"+urlId).val("unarchive");
-      }
-      else {
-       $("#"+urlId).val("archive");
-     }
-   });
-  }
+  //post url to /archived to add to user urlArchives
+  $.post( "../archived", { url: url, concept: concept },function(resp) {
+  	if (resp == "successful added") {
+  		$("#"+urlId).val("unarchive");
+    }
+    else {
+     $("#"+urlId).val("archive");
+   }
+ });
+}
 
 </script>
 

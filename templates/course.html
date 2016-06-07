@@ -2,16 +2,82 @@
 
 {% block content %}
 
-<div align="center">
+<style type="text/css">
+	#likesSpace {
+		padding-left: 15px;
+	}
+</style>
 
-<p>{{course}}</p>
+<div align='center'>
+	<h3>{{course}}</h3>
+</div>
 
-{% for concept in concepts %}
+<div id='left'>
 
-<a href="../concept/{{ concept }}">{{ concept }}</a> <br>
+	<div align='center'>
+		<h5>why {{course}} / {{course}} in action  <a href='/addwhy/{{course}}'>+</a></h5>
 
-{% endfor %}
+		<table align="center">
+
+		{% for link in linksWhy %}
+
+		<tr>
+			<td id="likesSpace">{{ link['likes'] }}</td>
+			{% if link['liked'] ==  False %}
+			<td id="likeButton"><input class="likeBtn" type="button" value="like" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
+
+			{% else %}
+			<td id="likeButton"><input class="likeBtn" type="button" value="unlike" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
+			{% endif %}
+		  {% if link['tubeTime'] %}
+		  <td id="title"><a href="http://{{ link['tubeTime'] }}" target="_blank">{{ link['title'] }}</a></td>
+		  {% else %}
+		  <td id="title"><a href="http://{{ link['url'] }}" target="_blank">{{ link['title'] }}</a></td>
+		  {% endif %}
+
+		</tr>
+
+		{% endfor %}
+		</table>
+	</div>
 
 </div>
+
+<div id='right'>
+
+	<div align="center">
+
+	<h5>concepts:</h5>
+
+	{% for concept in concepts %}
+
+	<a href="../concept/{{ concept }}">{{ concept }}</a> <br>
+
+	{% endfor %}
+
+	</div>
+
+</div>
+
+<script type="text/javascript">
+
+function postLike(likeUrl){
+	//get url
+	var urlId = likeUrl.id;
+	var url = likeUrl.name;
+	var course = "{{ course }}";
+
+    //post url to /liked to add to user urlLikes
+    $.post( "../liked", { url: url, course: course, type: "course" },function(resp) {
+    	if (resp == "successful added") {
+    		$("#"+urlId).val("unlike");
+    	}
+    	else {
+    		$("#"+urlId).val("like");
+    	}
+    });
+}
+
+</script>
 
 {% endblock %}

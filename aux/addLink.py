@@ -18,7 +18,7 @@ linkUrl = re.sub('http://www.', '', linkUrl)
 linkUrl = re.sub('www.', '', linkUrl)
 httpLinkUrl = "http://"+linkUrl
 
-#urlId = re.sub(r"[^a-zA-Z_0-9_:_._-]", '', urlId)
+#create symbol-less urlid
 urlId = re.sub(r"[^a-zA-Z_0-9]", '', linkUrl)
 
 #get title for webpage

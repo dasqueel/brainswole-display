@@ -212,9 +212,23 @@ def courses():
 @flask_login.login_required
 def course(course):
     courseDoc = conceptsDb['courses'].find_one({'name':course})
+    linksWhy = courseDoc['whyLinks']
     concepts = courseDoc['concepts']
 
-    return render_template('course.html', concepts=concepts, course=course)
+    #ordered links by expl
+    linksWhy = sorted(linksWhy, key=itemgetter('likes'), reverse=True)
+
+    #get users liked and archived links
+    userDoc = userDb[flask_login.current_user.userName].find_one({'userName':flask_login.current_user.userName})
+    userLiked = userDoc['liked']
+
+    for link in linksWhy:
+        if link['url'] in userLiked:
+            link['liked'] = True
+        else:
+            link['liked'] = False
+
+    return render_template('course.html', concepts=concepts, course=course, linksWhy=linksWhy)
 
 @app.route('/logout')
 def logout():
@@ -283,9 +297,7 @@ def concept(concept):
 @app.route('/addresource/<concept>')
 @flask_login.login_required
 def addresource(concept):
-    #start stop
     return render_template('addresource.html', concept=concept)
-
 
 @app.route('/back/addresource', methods=['POST'])
 @flask_login.login_required
@@ -303,21 +315,23 @@ def backResource():
     url = re.sub('http://www.', '', url)
     url = re.sub('www.', '', url)
     httpLinkUrl = "http://"+url
+    #recalibrate youtube url with /v/
+    url = url.replace('watch?v=','v/')
 
     #check for proper tubetime syntax
-    good = '0123456789'
+    good = '0123456789:'
     if tubeStart.strip(good) != '' or tubeEnd.strip(good) != '':
         flash('youtube start points can only contain numbers and a :')
         return redirect("addresource/"+concept)
     #continue on, youtubeStart and End are valid
     else:
         #check to see if resource is added already
-        linksCur = conceptsDb['conceptLinks'].find()
+        #linksCur = conceptsDb['conceptLinks'].find()
+        conceptDoc = conceptsDb['conceptLinks'].find_one({"name":concept})
         searchResult = False
-        for linkDoc in linksCur:
-            if any(d['url'] == url for d in linkDoc['explanations']):
-                searchResult = True
-                break
+        #for linkDoc in linksCur:
+        if any(d['url'] == url for d in conceptDoc['explanations']):
+            searchResult = True
 
         #add new url
         if searchResult == False:
@@ -325,60 +339,153 @@ def backResource():
             urlId = re.sub(r"[^a-zA-Z_0-9]", '', url)
 
             #get title for webpage
-            try:
+            #try:
                 #check to see if its youtube and has time constraints
-                tubeTimeUrl = None
-                if tubeStart and tubeEnd != '' and 'youtube' in url:
-                    tubeTimeUrl = tubeTimeConvert(tubeStart,tubeEnd,url)
+            tubeTimeUrl = None
+            if tubeStart != '' or tubeEnd != '' and 'youtube' in url:
+                tubeTimeUrl = tubeTimeConvert(tubeStart,tubeEnd,url)
 
-                response = urllib2.urlopen(httpLinkUrl)
-                html = response.read()
-                soup = BeautifulSoup(html, 'html.parser')
-                title = soup.html.head.title.text.strip()
+            response = urllib2.urlopen(httpLinkUrl)
+            html = response.read()
+            soup = BeautifulSoup(html, 'html.parser')
+            title = soup.html.head.title.text.strip()
 
-                conceptDoc = conceptsDb['conceptLinks'].find_one({"name":concept})
-                linkObjs = conceptDoc['explanations']
+            conceptDoc = conceptsDb['conceptLinks'].find_one({"name":concept})
+            linkObjs = conceptDoc['explanations']
 
-                #if its the first linkObj in explanations
-                if len(linkObjs) == 0:
+            #if its the first linkObj in explanations
+            if len(linkObjs) == 0:
+                #add link to explanations
+                newLinkObj = {"url":url,"urlId":urlId,"likes":0,"title":title}
+                if tubeTimeUrl != None:
+                    newLinkObj['tubeTime'] = tubeTimeUrl
+                    #add new newLinkObj to explanations
+                    conceptsDb['conceptLinks'].update({"name":concept},{"$push":{"explanations":newLinkObj}})
+                    return redirect("concept/"+concept)
+                else:
+                    #add new non-tubeTime newLinkObj to explanations
+                    conceptsDb['conceptLinks'].update({"name":concept},{"$push":{"explanations":newLinkObj}})
+                    return redirect("concept/"+concept)
+
+            else:
+                addedUrls = []
+                for linkObj in linkObjs:
+                    addedUrls.append(linkObj['url'])
+
+                if url in addedUrls:
+                    pass
+                else:
                     #add link to explanations
                     newLinkObj = {"url":url,"urlId":urlId,"likes":0,"title":title}
+
                     if tubeTimeUrl != None:
                         newLinkObj['tubeTime'] = tubeTimeUrl
                         #add new newLinkObj to explanations
                         conceptsDb['conceptLinks'].update({"name":concept},{"$push":{"explanations":newLinkObj}})
-                        return redirect("http://127.0.0.1:5000/concept/"+concept)
+                        return redirect("concept/"+concept)
                     else:
                         #add new non-tubeTime newLinkObj to explanations
                         conceptsDb['conceptLinks'].update({"name":concept},{"$push":{"explanations":newLinkObj}})
-                        return redirect("http://127.0.0.1:5000/concept/"+concept)
-
-                else:
-                    addedUrls = []
-                    for linkObj in linkObjs:
-                        addedUrls.append(linkObj['url'])
-
-                    if url in addedUrls:
-                        pass
-                    else:
-                        #add link to explanations
-                        newLinkObj = {"url":url,"urlId":urlId,"likes":0,"title":title}
-
-                        if tubeTimeUrl != None:
-                            newLinkObj['tubeTime'] = tubeTimeUrl
-                            #add new newLinkObj to explanations
-                            conceptsDb['conceptLinks'].update({"name":concept},{"$push":{"explanations":newLinkObj}})
-                            return redirect("http://127.0.0.1:5000/concept/"+concept)
-                        else:
-                            #add new non-tubeTime newLinkObj to explanations
-                            conceptsDb['conceptLinks'].update({"name":concept},{"$push":{"explanations":newLinkObj}})
-                            return redirect("http://127.0.0.1:5000/concept/"+concept)
-            except:
-                flash('error adding the resource, check syntax of url')
-                return redirect("http://127.0.0.1:5000/addresource/"+concept)
+                        return redirect("concept/"+concept)
+            #except:
+            #    flash('error adding the resource, check syntax of url')
+            #    return redirect("addresource/"+concept)
         else:
             flash('that resource has already been added')
-            return redirect("http://127.0.0.1:5000/addresource/"+concept)
+            return redirect("addresource/"+concept)
+
+@app.route('/addwhy/<course>')
+@flask_login.login_required
+def addwhy(course):
+    return render_template('addwhy.html', course=course)
+
+@app.route('/back/addwhy', methods=['POST'])
+@flask_login.login_required
+def backWhy():
+    ## code for a url constituting for multipe concepts ##
+    url = request.form.get("url")
+    tubeStart = request.form.get("youtubeStart")
+    tubeEnd = request.form.get("youtubeEnd")
+    course = request.form.get("course")
+
+    #parse the https:// or http://
+    url = re.sub('https://', '', url)
+    url = re.sub('http://', '', url)
+    url = re.sub('https://www.', '', url)
+    url = re.sub('http://www.', '', url)
+    url = re.sub('www.', '', url)
+    httpLinkUrl = "http://"+url
+    #recalibrate youtube url with /v/
+    url = url.replace('watch?v=','v/')
+
+    #check for proper tubetime syntax
+    good = '0123456789:'
+    if tubeStart.strip(good) != '' or tubeEnd.strip(good) != '':
+        flash('youtube start points can only contain numbers and a :')
+        return redirect("addresource/"+concept)
+
+    #continue on, youtubeStart and End are valid
+    else:
+        #check to see if resource is added already
+        courseDoc = conceptsDb['courses'].find_one({"name":course})
+        searchResult = False
+        if any(d['url'] == url for d in courseDoc['whyLinks']):
+            searchResult = True
+
+        #add new url
+        if searchResult == False:
+            #uniquie url id
+            urlId = re.sub(r"[^a-zA-Z_0-9]", '', url)
+            #check to see if its youtube and has time constraints
+            tubeTimeUrl = None
+            if tubeStart != '' or tubeEnd != '' and 'youtube' in url:
+                tubeTimeUrl = tubeTimeConvert(tubeStart,tubeEnd,url)
+
+            response = urllib2.urlopen(httpLinkUrl)
+            html = response.read()
+            soup = BeautifulSoup(html, 'html.parser')
+            title = soup.html.head.title.text.strip()
+
+            courseDoc = conceptsDb['courses'].find_one({"name":course})
+            linkObjs = courseDoc['whyLinks']
+
+            #if its the first linkObj in explanations
+            if len(linkObjs) == 0:
+                #add link to explanations
+                newLinkObj = {"url":url,"urlId":urlId,"likes":0,"title":title}
+                if tubeTimeUrl != None:
+                    newLinkObj['tubeTime'] = tubeTimeUrl
+                    #add new newLinkObj to explanations
+                    conceptsDb['concepts'].update({"name":course},{"$push":{"whyLinks":newLinkObj}})
+                    return redirect("course/"+course)
+                else:
+                    #add new non-tubeTime newLinkObj to explanations
+                    conceptsDb['courses'].update({"name":course},{"$push":{"whyLinks":newLinkObj}})
+                    return redirect("course/"+course)
+
+            else:
+                addedUrls = []
+                for linkObj in linkObjs:
+                    addedUrls.append(linkObj['url'])
+
+                if url in addedUrls:
+                    pass
+                else:
+                    #add link to explanations
+                    newLinkObj = {"url":url,"urlId":urlId,"likes":0,"title":title}
+
+                    if tubeTimeUrl != None:
+                        newLinkObj['tubeTime'] = tubeTimeUrl
+                        #add new newLinkObj to explanations
+                        conceptsDb['courses'].update({"name":course},{"$push":{"whyLinks":newLinkObj}})
+                        return redirect("course/"+course)
+                    else:
+                        #add new non-tubeTime newLinkObj to explanations
+                        conceptsDb['courses'].update({"name":course},{"$push":{"whyLinks":newLinkObj}})
+                        return redirect("course/"+course)
+        else:
+            flash('that resource has already been added')
+            return redirect("addresource/"+concept)
 
 @app.route('/experience/<concept>')
 @flask_login.login_required
@@ -400,26 +507,45 @@ def experience(concept):
 @flask_login.login_required
 def liked():
     if request.method == 'POST':
-        url = request.form.get("url")
-        concept = request.form.get("concept")
-
         userDoc = userDb[flask_login.current_user.userName].find_one({"userName":flask_login.current_user.userName})
         userLiked = userDoc['liked']
 
-        if url in userLiked:
-            #remove url from usersLiked
-            userDb[flask_login.current_user.userName].update({"userName":flask_login.current_user.userName},{"$pull":{"liked":url}})
-            #decrement url likes
-            conceptsDb['conceptLinks'].update({"name":concept, "explanations.url":url},{"$inc":{"explanations.$.likes":-1}})
+        url = request.form.get("url")
+        concept = request.form.get("concept")
+        course = request.form.get("course")
+        courseOrConcept = request.form.get("type")
 
-            return 'successful removed'
-        else:
-            #increment url likes
-            conceptsDb['conceptLinks'].update({"name":concept, "explanations.url":url},{"$inc":{"explanations.$.likes":1}})
-            #add link to users likes
-            userDb[flask_login.current_user.userName].update({"userName":flask_login.current_user.userName},{"$push":{"liked":url}})
-            #print 'add url'
-            return 'successful added'
+        if courseOrConcept == 'concept':
+
+            if url in userLiked:
+                #remove url from usersLiked
+                userDb[flask_login.current_user.userName].update({"userName":flask_login.current_user.userName},{"$pull":{"liked":url}})
+                #decrement url likes
+                conceptsDb['conceptLinks'].update({"name":concept, "explanations.url":url},{"$inc":{"explanations.$.likes":-1}})
+
+                return 'successful removed'
+            else:
+                #increment url likes
+                conceptsDb['conceptLinks'].update({"name":concept, "explanations.url":url},{"$inc":{"explanations.$.likes":1}})
+                #add link to users likes
+                userDb[flask_login.current_user.userName].update({"userName":flask_login.current_user.userName},{"$push":{"liked":url}})
+                #print 'add url'
+                return 'successful added'
+        elif courseOrConcept == 'course':
+            if url in userLiked:
+                #remove url from usersLiked
+                userDb[flask_login.current_user.userName].update({"userName":flask_login.current_user.userName},{"$pull":{"liked":url}})
+                #decrement url likes
+                conceptsDb['courses'].update({"name":course, "whyLinks.url":url},{"$inc":{"whyLinks.$.likes":-1}})
+
+                return 'successful removed'
+            else:
+                #increment url likes
+                conceptsDb['courses'].update({"name":course, "whyLinks.url":url},{"$inc":{"whyLinks.$.likes":1}})
+                #add link to users likes
+                userDb[flask_login.current_user.userName].update({"userName":flask_login.current_user.userName},{"$push":{"liked":url}})
+                #print 'add url'
+                return 'successful added'
     else:
         pass
 
@@ -669,10 +795,6 @@ def page_not_found(e):
 def page_not_found(e):
     app.logger.error(e)
     return render_template('500.html'), 500
-
-@app.route('/test')
-def test():
-    return render_template('test.html')
 
 if __name__ == '__main__':
     app.run(debug = True)
