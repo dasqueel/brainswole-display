@@ -23,3 +23,6 @@ def tubeTimeConvert(tubeStart,tubeEnd,url):
 		startTotal = startMins*60 + startSecs
 
 		return url+'?start='+str(startTotal)
+
+
+#getting a concepts courses it is in, for when creating a new userConceptDoc

@@ -3,8 +3,21 @@
 {% block content %}
 
 <div align="center">
+{% if error == concept+' is not a valid concept': %}
+{{error}}
+
+{% elif error == 'no resources are this time :(' %}
+<b>{{ concept }}</b>
+<a href='../addresource/{{concept}}' id='addlink'>Add Resource</a>
+<br>
+<br>
+{{error}}
+
+{% else %}
+
 <body bgcolor="#E6E6FA">
 
+<a href='../adddemo/{{concept}}' id='adddemo'>add demo</a>
 <b>{{ concept }}</b>
 <a href='../addresource/{{concept}}' id='addlink'>Add Resource</a>
 <br>
@@ -16,45 +29,44 @@
 {% for link in linksExpl %}
 
 <tr>
-	<td id="likesSpace">{{ link['likes'] }}</td>
-	{% if link['liked'] ==  False %}
-	<td id="likeButton"><input class="likeBtn" type="button" value="like" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
+  <td id="likesSpace">{{ link['likes'] }}</td>
+  {% if link['liked'] ==  False %}
+  <td id="likeButton"><input class="likeBtn" type="button" value="like" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
 
-	{% else %}
-	<td id="likeButton"><input class="likeBtn" type="button" value="unlike" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
-	{% endif %}
+  {% else %}
+  <td id="likeButton"><input class="likeBtn" type="button" value="unlike" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
+  {% endif %}
   {% if link['tubeTime'] %}
   <td id="title"><a href="http://{{ link['tubeTime'] }}" target="_blank">{{ link['title'] }}</a></td>
   {% else %}
   <td id="title"><a href="http://{{ link['url'] }}" target="_blank">{{ link['title'] }}</a></td>
   {% endif %}
 
-	{% if link['archived'] ==  False %}
-	<td><input class="archiveBtn" type="button" value="archive" name='{{ link["url"] }}' id='archive{{ link["urlId"] }}' onclick="postArchive(this)" /></td>
+  {% if link['archived'] ==  False %}
+  <td><input class="archiveBtn" type="button" value="archive" name='{{ link["url"] }}' id='archive{{ link["urlId"] }}' onclick="postArchive(this)" /></td>
 
-	{% else %}
-	<td><input class="archiveBtn" type="button" value="unarchive" name='{{ link["url"] }}' id='archive{{ link["urlId"] }}' onclick="postArchive(this)" /></td>
-	{% endif %}
+  {% else %}
+  <td><input class="archiveBtn" type="button" value="unarchive" name='{{ link["url"] }}' id='archive{{ link["urlId"] }}' onclick="postArchive(this)" /></td>
+  {% endif %}
 </tr>
 
 {% endfor %}
 </table>
 </body>
-
-
+</div>
 
 <script type="text/javascript">
 
 function postLike(likeUrl){
-	//get url
+  //get url
   var urlId = likeUrl.id;
   var url = likeUrl.name;
   var concept = "{{ concept }}";
 
     //post url to /liked to add to user urlLikes
     $.post( "../liked", { url: url, concept: concept, type: "concept" },function(resp) {
-    	if (resp == "successful added") {
-    		$("#"+urlId).val("unlike");
+      if (resp == "successful added") {
+        $("#"+urlId).val("unlike");
       }
       else {
        $("#"+urlId).val("like");
@@ -71,8 +83,8 @@ function postArchive(linkUrl){
 
   //post url to /archived to add to user urlArchives
   $.post( "../archived", { url: url, concept: concept },function(resp) {
-  	if (resp == "successful added") {
-  		$("#"+urlId).val("unarchive");
+    if (resp == "successful added") {
+      $("#"+urlId).val("unarchive");
     }
     else {
      $("#"+urlId).val("archive");
@@ -81,5 +93,7 @@ function postArchive(linkUrl){
 }
 
 </script>
+
+{% endif %}
 
 {% endblock %}

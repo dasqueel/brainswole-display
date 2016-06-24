@@ -1,3 +1,7 @@
+body {
+	background-color: #E8E8E8 !important;
+}
+
 .navbar-nav {
 	width: 100%;
 	text-align: center;
@@ -25,12 +29,13 @@ td {
 }
 
 #likeButton {
+	padding-left: 10px;
 	padding-right: 13px;
 	width: 20px;
 }
 
 #likesSpace {
-	padding-right: 13px;
+	padding-right: 4px;
 }
 
 .likeBtn {
@@ -41,6 +46,46 @@ td {
 	width:78px;
 }
 
+/* course */
+
+#left {
+	float:left;
+	width: 50%;
+}
+#right {
+	float:right;
+	width: 50%;
+}
+
+#courseLike {
+	padding-left: 10px;
+	padding-right: 4px;
+	padding-bottom: 0px;
+	padding-top: 0px;
+}
+
+#report {
+	line-height: 1px;
+	margin-left: 5px;
+	padding: 1px;
+}
+
+#reportText {
+	font-size: 10px;
+	padding-left: 5px;
+	cursor: pointer;
+	color: blue;
+}
+
+.courseLikeBtn {
+	width: 45px;
+	padding: 0px;
+	margin-right: 8px;
+}
+
+#courseAdd {
+	font-size: 11px;
+}
 /* import data */
 #importdiv {
 	margin: 0 auto;
@@ -65,14 +110,8 @@ td {
 	padding-right: 120px;
 }
 
-/* course */
-
-
-#left {
-	float:left;
-	width: 50%;
-}
-#right {
-	float:right;
-	width: 50%;
+#adddemo {
+	position: absolute;
+	left: 0;
+	padding-left: 120px;
 }

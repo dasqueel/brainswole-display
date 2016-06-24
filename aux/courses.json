@@ -36,5 +36,12 @@
 		"range trees",
 		"interval trees",
 		"dijkstras algorithm"
+	],
+	"statistics" : [
+		"mean",
+		"mode",
+		"median",
+		"standard deviation",
+		"z score"
 	]
 }

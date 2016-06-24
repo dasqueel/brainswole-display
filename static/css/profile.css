@@ -1,3 +1,7 @@
+body {
+	background-color: #E8E8E8 !important;
+}
+
 #courseTable {
 	margin: 0 auto;
 	width: 80%;

@@ -149,7 +149,7 @@ def register():
 
             flask_login.login_user(user)
 
-            return redirect(url_for('home'))
+            return redirect(url_for('courses'))
 
 @app.route('/login', methods=['GET','POST'])
 def login():
@@ -190,7 +190,7 @@ def login():
                 user = User(userName,email,userDoc['firstName'])
 
                 flask_login.login_user(user)
-                return redirect(url_for('home'))
+                return redirect(url_for('courses'))
     else:
         return render_template('login.html')
 
@@ -205,7 +205,6 @@ def courses():
     courseCol = conceptsDb['courses'].find()
     for doc in courseCol:
         courses.append(doc['name'])
-    #courses = ['probability and statistics','intro to chemistry','data structures']
     return render_template('courses.html', courses=courses)
 
 @app.route('/course/<course>')
@@ -256,43 +255,99 @@ def result():
 @app.route('/concept/<concept>')
 @flask_login.login_required
 def concept(concept):
-    concept = str(concept)
+    #make sure concept is a valid one, not "butt stuff"
+    masterConcepts = generalDb['general'].find_one({'doc':'general'})['masterConcepts']
 
-    if conceptsDb['conceptLinks'].find_one({'name':concept}):
+    if concept in masterConcepts:
+
         #get concept links from mongo database
         conceptLinksDoc = conceptsDb['conceptLinks'].find_one({'name':concept})
 
         linksExpl = conceptLinksDoc['explanations']
-        linksPract =  conceptLinksDoc['practice']
+        if linksExpl != []:
+            linksPract =  conceptLinksDoc['practice']
 
-        #ordered links by expl
-        linksExpl = sorted(linksExpl, key=itemgetter('likes'), reverse=True)
-        linksPract = sorted(linksPract, key=itemgetter('likes'), reverse=True)
+            #ordered links by expl
+            linksExpl = sorted(linksExpl, key=itemgetter('likes'), reverse=True)
+            linksPract = sorted(linksPract, key=itemgetter('likes'), reverse=True)
 
-        #get users liked and archived links
-        userDoc = userDb[flask_login.current_user.userName].find_one({'userName':flask_login.current_user.userName})
-        userLiked = userDoc['liked']
-        userArchived = userDoc['archived']
+            #get users liked and archived links
+            userDoc = userDb[flask_login.current_user.userName].find_one({'userName':flask_login.current_user.userName})
+            userLiked = userDoc['liked']
+            userArchived = userDoc['archived']
 
-        #determine if user has liked or archived explanation links
-        for link in linksExpl:
-            if link['url'] in userLiked and link['url'] in userArchived:
-                link['liked'] = True
-                link['archived'] = True
-            elif link['url'] in userLiked and link['url'] not in userArchived:
-                link['liked'] = True
-                link['archived'] = False
-            elif link['url'] in userArchived and link['url'] not in userLiked:
-                link['archived'] = True
-                link['liked'] = False
-            else:
-                link['archived'] = False
-                link['liked'] = False
+            #determine if user has liked or archived explanation links
+            for link in linksExpl:
+                if link['url'] in userLiked and link['url'] in userArchived:
+                    link['liked'] = True
+                    link['archived'] = True
+                elif link['url'] in userLiked and link['url'] not in userArchived:
+                    link['liked'] = True
+                    link['archived'] = False
+                elif link['url'] in userArchived and link['url'] not in userLiked:
+                    link['archived'] = True
+                    link['liked'] = False
+                else:
+                    link['archived'] = False
+                    link['liked'] = False
 
-        #print linksExpl
-        return render_template('concept.html', concept=concept, linksExpl=linksExpl, linksPract=linksPract,error=None)
+            return render_template('concept.html', concept=concept, linksExpl=linksExpl, linksPract=linksPract,error=None)
+        else:
+            return render_template('concept.html', concept=concept, error='no resources are this time :(')
+
     else:
-        return render_template('concept.html', concept=concept, error='no resources are this time :(')
+        #not a valid concept
+        error = concept+' is not a valid concept'
+        return render_template('concept.html', concept=concept, error=error)
+
+@app.route('/adddemo/<concept>')
+@flask_login.login_required
+def adddemo(concept):
+    return render_template('adddemo.html', concept=concept)
+
+@app.route('/back/adddemo', methods=['POST'])
+@flask_login.login_required
+def backDemo():
+    ## code for a url constituting for multipe concepts ##
+    url = request.form.get("url")
+    concept = request.form.get("concept")
+
+    #parse the https:// or http://
+    url = re.sub('https://', '', url)
+    url = re.sub('http://', '', url)
+    url = re.sub('https://www.', '', url)
+    url = re.sub('http://www.', '', url)
+    url = re.sub('www.', '', url)
+    httpLinkUrl = "http://"+url
+    #recalibrate youtube url with /v/
+    url = url.replace('watch?v=','v/')
+
+    #check to see if userConceptDoc is already inserted
+    if userDb[flask_login.current_user.userName].find_one({'concept':concept}):
+
+        #check to see if demo is already added
+        userConceptDoc = userDb[flask_login.current_user.userName].find_one({'concept':concept})
+
+        if url in userConceptDoc['demos']:
+            #demo has already been added
+            flash('that demonstration has already been added')
+            return redirect("adddemo/"+concept)
+        else:
+            #add new demo
+            userDb[flask_login.current_user.userName].update({'concept':concept},{'$push':{'demos':url}})
+            #return 'yup'
+            return redirect(url_for('home'))
+
+    else:
+        #user hasnt created a userConceptDoc, create one and insert the url
+        newUserConceptDoc = {'concept':concept,'courses':[],'practice':[],'explanations':[],'demos':[url],'lastVisit':datetime.datetime.utcnow()}
+
+        #add course(s) the concept its part of ** could redo this more efficiently  **
+        for courseName,courseList in courseConcepts.iteritems():
+            if concept in courseList:
+                newUserConceptDoc['courses'].append(courseName)
+        userDb[flask_login.current_user.userName].insert(newUserConceptDoc)
+        return redirect(url_for('home'))
 
 @app.route('/addresource/<concept>')
 @flask_login.login_required
@@ -326,10 +381,9 @@ def backResource():
     #continue on, youtubeStart and End are valid
     else:
         #check to see if resource is added already
-        #linksCur = conceptsDb['conceptLinks'].find()
         conceptDoc = conceptsDb['conceptLinks'].find_one({"name":concept})
         searchResult = False
-        #for linkDoc in linksCur:
+        #loop through the concepts explanation links
         if any(d['url'] == url for d in conceptDoc['explanations']):
             searchResult = True
 
@@ -339,57 +393,70 @@ def backResource():
             urlId = re.sub(r"[^a-zA-Z_0-9]", '', url)
 
             #get title for webpage
-            #try:
-                #check to see if its youtube and has time constraints
+            #check to see if its youtube and has time constraints
             tubeTimeUrl = None
             if tubeStart != '' or tubeEnd != '' and 'youtube' in url:
                 tubeTimeUrl = tubeTimeConvert(tubeStart,tubeEnd,url)
+            #try doing beautifulsoup stuff
+            try:
+                response = urllib2.urlopen(httpLinkUrl)
+                html = response.read()
+                soup = BeautifulSoup(html, 'html.parser')
+                title = soup.html.head.title.text.strip()
 
-            response = urllib2.urlopen(httpLinkUrl)
-            html = response.read()
-            soup = BeautifulSoup(html, 'html.parser')
-            title = soup.html.head.title.text.strip()
+                #conceptDoc = conceptsDb['conceptLinks'].find_one({"name":concept})
+                linkObjs = conceptDoc['explanations']
 
-            conceptDoc = conceptsDb['conceptLinks'].find_one({"name":concept})
-            linkObjs = conceptDoc['explanations']
-
-            #if its the first linkObj in explanations
-            if len(linkObjs) == 0:
-                #add link to explanations
-                newLinkObj = {"url":url,"urlId":urlId,"likes":0,"title":title}
-                if tubeTimeUrl != None:
-                    newLinkObj['tubeTime'] = tubeTimeUrl
-                    #add new newLinkObj to explanations
-                    conceptsDb['conceptLinks'].update({"name":concept},{"$push":{"explanations":newLinkObj}})
-                    return redirect("concept/"+concept)
-                else:
-                    #add new non-tubeTime newLinkObj to explanations
-                    conceptsDb['conceptLinks'].update({"name":concept},{"$push":{"explanations":newLinkObj}})
-                    return redirect("concept/"+concept)
-
-            else:
-                addedUrls = []
-                for linkObj in linkObjs:
-                    addedUrls.append(linkObj['url'])
-
-                if url in addedUrls:
-                    pass
-                else:
+                #if its the first linkObj in explanations
+                if len(linkObjs) == 0:
                     #add link to explanations
-                    newLinkObj = {"url":url,"urlId":urlId,"likes":0,"title":title}
-
+                    newLinkObj = {"url":url,"urlId":urlId,"likes":1,"title":title}
                     if tubeTimeUrl != None:
                         newLinkObj['tubeTime'] = tubeTimeUrl
                         #add new newLinkObj to explanations
                         conceptsDb['conceptLinks'].update({"name":concept},{"$push":{"explanations":newLinkObj}})
+
+                        #add to users likes
+                        userDb[flask_login.current_user.userName].update({'userName':flask_login.current_user.userName},{'$push':{'liked':url}})
                         return redirect("concept/"+concept)
                     else:
                         #add new non-tubeTime newLinkObj to explanations
                         conceptsDb['conceptLinks'].update({"name":concept},{"$push":{"explanations":newLinkObj}})
+
+                        #add to users likes
+                        userDb[flask_login.current_user.userName].update({'userName':flask_login.current_user.userName},{'$push':{'liked':url}})
                         return redirect("concept/"+concept)
-            #except:
-            #    flash('error adding the resource, check syntax of url')
-            #    return redirect("addresource/"+concept)
+
+                else:
+                    addedUrls = []
+                    for linkObj in linkObjs:
+                        addedUrls.append(linkObj['url'])
+
+                    if url in addedUrls:
+                        pass
+                    else:
+                        #add link to explanations
+                        newLinkObj = {"url":url,"urlId":urlId,"likes":1,"title":title}
+
+                        if tubeTimeUrl != None:
+                            newLinkObj['tubeTime'] = tubeTimeUrl
+                            #add new newLinkObj to explanations
+                            conceptsDb['conceptLinks'].update({"name":concept},{"$push":{"explanations":newLinkObj}})
+
+                            #add to users likes
+                            userDb[flask_login.current_user.userName].update({'userName':flask_login.current_user.userName},{'$push':{'liked':url}})
+                            return redirect("concept/"+concept)
+                        else:
+                            #add new non-tubeTime newLinkObj to explanations
+                            conceptsDb['conceptLinks'].update({"name":concept},{"$push":{"explanations":newLinkObj}})
+
+                            #add to users likes
+                            userDb[flask_login.current_user.userName].update({'userName':flask_login.current_user.userName},{'$push':{'liked':url}})
+                            return redirect("concept/"+concept)
+            except:
+                #add resource to 'add manually' list#
+                flash('there was an error adding that resource, we will try adding the resource.  thanks for the suggestion!')
+                return redirect("addresource/"+concept)
         else:
             flash('that resource has already been added')
             return redirect("addresource/"+concept)
@@ -422,7 +489,7 @@ def backWhy():
     good = '0123456789:'
     if tubeStart.strip(good) != '' or tubeEnd.strip(good) != '':
         flash('youtube start points can only contain numbers and a :')
-        return redirect("addresource/"+concept)
+        return redirect("addwhy/"+concept)
 
     #continue on, youtubeStart and End are valid
     else:
@@ -448,44 +515,52 @@ def backWhy():
 
             courseDoc = conceptsDb['courses'].find_one({"name":course})
             linkObjs = courseDoc['whyLinks']
+            newLinkObj = {"url":url,"urlId":urlId,"likes":1,"title":title,"reports":0,"date":datetime.datetime.utcnow()}
 
-            #if its the first linkObj in explanations
-            if len(linkObjs) == 0:
+            addedUrls = []
+            for linkObj in linkObjs:
+                addedUrls.append(linkObj['url'])
+
+            if url in addedUrls:
+                pass
+            else:
                 #add link to explanations
-                newLinkObj = {"url":url,"urlId":urlId,"likes":0,"title":title}
                 if tubeTimeUrl != None:
                     newLinkObj['tubeTime'] = tubeTimeUrl
                     #add new newLinkObj to explanations
-                    conceptsDb['concepts'].update({"name":course},{"$push":{"whyLinks":newLinkObj}})
+                    conceptsDb['courses'].update({"name":course},{"$push":{"whyLinks":newLinkObj}})
+
+                    #add to users likes
+                    userDb[flask_login.current_user.userName].update({'userName':flask_login.current_user.userName},{'$push':{'liked':url}})
                     return redirect("course/"+course)
                 else:
                     #add new non-tubeTime newLinkObj to explanations
                     conceptsDb['courses'].update({"name":course},{"$push":{"whyLinks":newLinkObj}})
+
+                    #add to users likes
+                    userDb[flask_login.current_user.userName].update({'userName':flask_login.current_user.userName},{'$push':{'liked':url}})
                     return redirect("course/"+course)
-
-            else:
-                addedUrls = []
-                for linkObj in linkObjs:
-                    addedUrls.append(linkObj['url'])
-
-                if url in addedUrls:
-                    pass
-                else:
-                    #add link to explanations
-                    newLinkObj = {"url":url,"urlId":urlId,"likes":0,"title":title}
-
-                    if tubeTimeUrl != None:
-                        newLinkObj['tubeTime'] = tubeTimeUrl
-                        #add new newLinkObj to explanations
-                        conceptsDb['courses'].update({"name":course},{"$push":{"whyLinks":newLinkObj}})
-                        return redirect("course/"+course)
-                    else:
-                        #add new non-tubeTime newLinkObj to explanations
-                        conceptsDb['courses'].update({"name":course},{"$push":{"whyLinks":newLinkObj}})
-                        return redirect("course/"+course)
+        #url has already been added
         else:
             flash('that resource has already been added')
-            return redirect("addresource/"+concept)
+            return redirect("addwhy/"+course)
+
+@app.route('/back/report', methods=['POST'])
+@flask_login.login_required
+def report():
+    url = request.form.get("url")
+    courseOrConcept = request.form.get("type")
+
+    if courseOrConcept == 'course':
+        course = request.form.get("course")
+
+        #update courselink is courseWhy
+        if conceptsDb['courses'].update({'name':course, 'whyLinks.url':url},{'$inc':{"whyLinks.$.reports":1}}):
+            #add to report
+            return 'yup'
+        else:
+            #add to report
+            return 'nope'
 
 @app.route('/experience/<concept>')
 @flask_login.login_required
@@ -593,6 +668,7 @@ def archived():
                     'concept':concept,
                     'explanations':[linkObj],
                     'practice':[],
+                    'demos':[],
                     'lastVisit':datetime.datetime.utcnow(),
                     'courses':[]
                 }
@@ -644,21 +720,21 @@ def profile(userName):
     userCol = userDb[userName]
 
     #grab all of users conceptLinkObjs
-    userCursor = userCol.find({"concept":{'$exists': True}})
+    userConceptDocs = userCol.find({"concept":{'$exists': True}})
     conceptObjs = []
     #get users courses and concepts
     courses = {}
 
-    for concept in userCursor:
-        #get users courses
-        for course in concept['courses']:
+    for conceptDoc in userConceptDocs:
+        #get users courses and build courses dict with the keys(course names) and values (list of concepts in course)
+        for course in conceptDoc['courses']:
             if course not in courses.keys():
                 courses[course] = []
-        conceptObjs.append(concept)
+        conceptObjs.append(conceptDoc)
         #get users concepts in their courses
         for course, courseList in courseConcepts.iteritems():
-            if concept['concept'] in courseList:
-                courses[course].append(concept)
+            if conceptDoc['concept'] in courseList:
+                courses[course].append(conceptDoc)
     #get users recent concepts
     conceptObjs.sort(key=lambda item:item['lastVisit'], reverse=True)
     return render_template('profile3.html', courses=courses, conceptObjs=conceptObjs)

@@ -1,11 +1,11 @@
 from pymongo import MongoClient
 
 #connect to mongo
-#client = MongoClient('localhost')
-client = MongoClient('mongodb://neil:squ33ler@52.24.174.234/admin')
+client = MongoClient('localhost')
+#client = MongoClient('mongodb://neil:squ33ler@52.24.174.234/admin')
 conceptsDb = client.Concepts
 
-course = 'Calculus'
+curse = 'Calculus'
 
 concepts = [
 	'derivative',

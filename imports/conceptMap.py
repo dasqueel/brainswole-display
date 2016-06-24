@@ -47,5 +47,22 @@ khanMap = {
 	'optimization problem':['optimization'],
 	'integration by substitution':['integration-by-u-substitution',
 									'integration-using-trigonometric-substitution'],
-	'improper integrals':['improper-integrals']
+	'improper integrals':['improper-integrals'],
+	'expected value':['expected-value-with-empirical-probabilities',
+						'expected-value-with-calculated-probabilities',
+						'making-decisions-with-expected-values',
+						'expected_value'],
+	'standard deviation':['standard_deviation_of_a_population',
+							'standard_deviation'],
+	'empirical':['empirical_rule'],
+	'set notation':['basic_set_notation'],
+	'probability':['probability_with_perm_comb','multiplying-dependent-probabilities','expected-value-with-calculated-probabilities','expected-value-with-empirical-probabilities','using-probability-to-make-fair-decisions','probability_1','finding-probability','understanding-probability','using-probability-to-make-predictions','probability-models','independent_probability','adding-probability','constructing-probability-distributions','dependent_probability','multiplying-dependent-probabilities'],
+	'hypothesis testing':['hypothesis-testing-in-experiments','hypothesis-testing-with-simulations'],
+	'scatter plots':['fitting-functions-to-scatter-plots','constructing-scatter-plots','making-good-scatter-plots','positive-and-negative-linear-correlations-from-scatter-plots','interpreting-scatter-plots'],
+	'linear regression':['linear-models-of-bivariate-data','interpreting-slope-and-y-intercept-of-lines-of-best-fit','plotting_the_line_of_best_fit','correlation-coefficient-intuition'],
+	'variance':['variance'],
+	'permutations':['permutations_and_combinations_2','permutations_1','probability_with_perm_comb'],
+	'combinations':['permutations_and_combinations_2','combinations_1','probability_with_perm_comb']
 }
+
+codecademyMap = {}

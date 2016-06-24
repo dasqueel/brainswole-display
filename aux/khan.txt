@@ -1920,7 +1920,6 @@ average-rate-of-change-word-problems
 checking-solutions-to-systems-of-inequalities
 factoring-polynomials
 graphs_of_inequalities
-making-decisions-with-expected-values
 multiplying_expressions_0.5
 piecewise-graphs-linear
 symmetry-of-two-dimensional-shapes

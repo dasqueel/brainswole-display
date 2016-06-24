@@ -2,12 +2,6 @@
 
 {% block content %}
 
-<style type="text/css">
-	#likesSpace {
-		padding-left: 15px;
-	}
-</style>
-
 <div align='center'>
 	<h3>{{course}}</h3>
 </div>
@@ -15,27 +9,27 @@
 <div id='left'>
 
 	<div align='center'>
-		<h5>why {{course}} / {{course}} in action  <a href='/addwhy/{{course}}'>+</a></h5>
+		<h5>why {{course}} / {{course}} in action  <a id ='courseAdd' href='/addwhy/{{course}}'>add link</a></h5>
 
 		<table align="center">
 
 		{% for link in linksWhy %}
 
 		<tr>
-			<td id="likesSpace">{{ link['likes'] }}</td>
+			<td id="courseLike">{{ link['likes'] }}</td>
 			{% if link['liked'] ==  False %}
-			<td id="likeButton"><input class="likeBtn" type="button" value="like" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
+			<td id="courseButton"><input class="courseLikeBtn" type="button" value="like" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
 
 			{% else %}
-			<td id="likeButton"><input class="likeBtn" type="button" value="unlike" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
+			<td id="courseButton"><input class="courseLikeBtn" type="button" value="unlike" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
 			{% endif %}
 		  {% if link['tubeTime'] %}
 		  <td id="title"><a href="http://{{ link['tubeTime'] }}" target="_blank">{{ link['title'] }}</a></td>
 		  {% else %}
 		  <td id="title"><a href="http://{{ link['url'] }}" target="_blank">{{ link['title'] }}</a></td>
 		  {% endif %}
-
 		</tr>
+		<tr><td id='report'><p id='reportText' onclick='report("{{link["url"]}}")'>report</p></td></tr>
 
 		{% endfor %}
 		</table>
@@ -76,6 +70,20 @@ function postLike(likeUrl){
     		$("#"+urlId).val("like");
     	}
     });
+}
+
+function report(url){
+	//alert(url);
+	var course = "{{ course }}";
+
+	$.post("../back/report", {url:url, course:course, type:"course"}, function(resp) {
+		if (resp == 'yup') {
+			alert("thanks! we look into the relevance of this link");
+		}
+		else {
+			alert("whoops, something went wrong")
+		}
+	})
 }
 
 </script>
