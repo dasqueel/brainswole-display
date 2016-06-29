@@ -9,9 +9,10 @@ import requests
 from imports.imports import *
 from imports.courseConcepts import *
 from oauth import *
+from stuff import *
 
 app = flask.Flask(__name__)
-app.secret_key = '\xb9?\xa5\xab\x86k\x90m\xba&\x1a9@\xdb`L"\x96\x12a\xf4\xd5\x19q'
+app.secret_key = aaabbbbccc
 
 import flask_login
 
@@ -227,7 +228,9 @@ def course(course):
         else:
             link['liked'] = False
 
-    return render_template('course.html', concepts=concepts, course=course, linksWhy=linksWhy)
+    linksWhyNew = sorted(linksWhy, key=lambda k: k['date'], reverse=True)
+
+    return render_template('course.html', concepts=concepts, course=course, linksWhy=linksWhy, linksWhyNew=linksWhyNew)
 
 @app.route('/logout')
 def logout():
@@ -322,6 +325,16 @@ def backDemo():
     #recalibrate youtube url with /v/
     url = url.replace('watch?v=','v/')
 
+    #title
+    response = urllib2.urlopen(httpLinkUrl)
+    html = response.read()
+    soup = BeautifulSoup(html, 'html.parser')
+    title = soup.html.head.title.text.strip()
+
+    #urlId
+    urlId = re.sub(r"[^a-zA-Z_0-9]", '', url)
+    newLinkObj = {"url":url,"urlId":urlId,"title":title}
+
     #check to see if userConceptDoc is already inserted
     if userDb[flask_login.current_user.userName].find_one({'concept':concept}):
 
@@ -334,13 +347,13 @@ def backDemo():
             return redirect("adddemo/"+concept)
         else:
             #add new demo
-            userDb[flask_login.current_user.userName].update({'concept':concept},{'$push':{'demos':url}})
+            userDb[flask_login.current_user.userName].update({'concept':concept},{'$push':{'demos':newLinkObj}})
             #return 'yup'
             return redirect(url_for('home'))
 
     else:
         #user hasnt created a userConceptDoc, create one and insert the url
-        newUserConceptDoc = {'concept':concept,'courses':[],'practice':[],'explanations':[],'demos':[url],'lastVisit':datetime.datetime.utcnow()}
+        newUserConceptDoc = {'concept':concept,'courses':[],'practice':[],'explanations':[],'demos':[newLinkObj],'lastVisit':datetime.datetime.utcnow()}
 
         #add course(s) the concept its part of ** could redo this more efficiently  **
         for courseName,courseList in courseConcepts.iteritems():
@@ -744,8 +757,9 @@ def usersConcept(userName,concept):
     conceptDoc = userDb[userName].find_one({'concept':concept})
     expllinks = conceptDoc['explanations']
     practlinks = conceptDoc['practice']
+    demolinks = conceptDoc['demos']
 
-    return render_template('userConcept.html', concept=concept, expllinks=expllinks,practlinks=practlinks)
+    return render_template('userConcept.html', concept=concept, expllinks=expllinks,practlinks=practlinks,demolinks=demolinks)
 
 @app.route('/requesttoken')
 @flask_login.login_required

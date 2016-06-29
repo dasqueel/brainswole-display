@@ -10,46 +10,46 @@
 
 	<div align='center'>
 		<h5>why {{course}} / {{course}} in action  <a id ='courseAdd' href='/addwhy/{{course}}'>add link</a></h5>
-
-		<table align="center">
-
-		{% for link in linksWhy %}
-
-		<tr>
-			<td id="courseLike">{{ link['likes'] }}</td>
-			{% if link['liked'] ==  False %}
-			<td id="courseButton"><input class="courseLikeBtn" type="button" value="like" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
-
-			{% else %}
-			<td id="courseButton"><input class="courseLikeBtn" type="button" value="unlike" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
-			{% endif %}
-		  {% if link['tubeTime'] %}
-		  <td id="title"><a href="http://{{ link['tubeTime'] }}" target="_blank">{{ link['title'] }}</a></td>
-		  {% else %}
-		  <td id="title"><a href="http://{{ link['url'] }}" target="_blank">{{ link['title'] }}</a></td>
-		  {% endif %}
-		</tr>
-		<tr><td id='report'><p id='reportText' onclick='report("{{link["url"]}}")'>report</p></td></tr>
-
-		{% endfor %}
-		</table>
+		<button onclick='linkType("top")'>Top</button><button onclick='linkType("new")'>New</button>
 	</div>
+
+	<table id='whyTable'>
+
+	<div id='links'>
+
+	{% for link in linksWhy %}
+
+	<tr>
+		<td id="courseLike">{{ link['likes'] }}</td>
+		{% if link['liked'] ==  False %}
+		<td><input class="courseLikeBtn" type="button" value="like" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
+
+		{% else %}
+		<td><input class="courseLikeBtn" type="button" value="unlike" name='{{ link["url"] }}' id='like{{ link["urlId"] }}' onclick="postLike(this)" /></td>
+		{% endif %}
+	  {% if link['tubeTime'] %}
+	  <td id="title"><a href="http://{{ link['tubeTime'] }}" target="_blank">{{ link['title'] }}</a></td>
+	  {% else %}
+	  <td id="title"><a href="http://{{ link['url'] }}" target="_blank">{{ link['title'] }}</a></td>
+	  {% endif %}
+	</tr>
+	<tr><td id='report'><p id='reportText' onclick='report("{{link["url"]}}")'>report</p></td></tr>
+
+	{% endfor %}
+	</div>
+	</table>
 
 </div>
 
 <div id='right'>
 
-	<div align="center">
-
 	<h5>concepts:</h5>
 
 	{% for concept in concepts %}
 
-	<a href="../concept/{{ concept }}">{{ concept }}</a> <br>
+	<a id='conceptText' href="../concept/{{ concept }}">{{ concept }}</a> <br>
 
 	{% endfor %}
-
-	</div>
 
 </div>
 
@@ -73,7 +73,6 @@ function postLike(likeUrl){
 }
 
 function report(url){
-	//alert(url);
 	var course = "{{ course }}";
 
 	$.post("../back/report", {url:url, course:course, type:"course"}, function(resp) {
@@ -84,6 +83,18 @@ function report(url){
 			alert("whoops, something went wrong")
 		}
 	})
+}
+
+function linkType(type) {
+
+	if (type == 'top') {
+		$("#whyTable tr").remove();
+		$('#links').html('{% for link in linksWhy %} <tr> <td id="courseLike">{{ link["likes"] }}</td> {% if link["liked"] == False %} <td id="courseButton"><input class="courseLikeBtn" type="button" value="like" name="{{ link["url"] }}" id="like{{ link["urlId"] }}" onclick="postLike(this)" /></td> {% else %} <td id="courseButton"><input class="courseLikeBtn" type="button" value="unlike" name="{{ link["url"] }}" id="like{{ link["urlId"] }}" onclick="postLike(this)" /></td> {% endif %} {% if link["tubeTime"] %} <td id="title"><a href="http://{{ link["tubeTime"] }}" target="_blank">{{ link["title"] }}</a></td> {% else %} <td id="title"><a href="http://{{ link["url"] }}" target="_blank">{{ link["title"] }}</a></td> {% endif %} </tr> <tr><td id="report"><p id="reportText" onclick="report("{{link["url"]}}")">report</p></td></tr> {% endfor %}');
+	}
+	else if (type == 'new') {
+		$("#whyTable tr").remove();
+		$('#links').html('{% for link in linksWhyNew %} <tr> <td id="courseLike">{{ link["likes"] }}</td> {% if link["liked"] == False %} <td id="courseButton"><input class="courseLikeBtn" type="button" value="like" name="{{ link["url"] }}" id="like{{ link["urlId"] }}" onclick="postLike(this)" /></td> {% else %} <td id="courseButton"><input class="courseLikeBtn" type="button" value="unlike" name="{{ link["url"] }}" id="like{{ link["urlId"] }}" onclick="postLike(this)" /></td> {% endif %} {% if link["tubeTime"] %} <td id="title"><a href="http://{{ link["tubeTime"] }}" target="_blank">{{ link["title"] }}</a></td> {% else %} <td id="title"><a href="http://{{ link["url"] }}" target="_blank">{{ link["title"] }}</a></td> {% endif %} </tr> <tr><td id="report"><p id="reportText" onclick="report("{{link["url"]}}")">report</p></td></tr> {% endfor %}')
+	}
 }
 
 </script>

@@ -20,6 +20,7 @@ body {
 
 <br>
 <br>
+<br>
 
 <h2>Practice experience</h2>
 {% for link in practlinks %}
@@ -27,6 +28,22 @@ body {
 <a href="http://{{ link['url'] }}" target='_blank'>{{ link['title'] }} || correct: {{link['probsCorrect']}} attempted: {{link['probsAttempted']}}</a><br>
 
 {% endfor %}
+
+<br>
+<br>
+<br>
+
+<h2>Demonstrations</h2>
+{% for link in demolinks %}
+
+<a href="http://{{ link['url'] }}" target='_blank'>{{ link['title'] }}</a><br>
+
+{% endfor %}
+
+<br>
+<br>
+
+
 
 </div>
 

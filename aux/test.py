@@ -26,9 +26,12 @@ client = MongoClient('localhost')
 conceptsDb = client.Concepts
 userDb = client.ArchiveUsers
 
-userConceptDoc = userDb['neilbarduson'].find_one({'concept':'insert sort'})
+coursesCur = conceptsDb['courses'].find()
 
-if userDb['neilbarduson'].find_one({'concept':'derivative'}):
-	print 'yup'
-else:
-	print 'nope'
+for course in coursesCur:
+	print course['name']
+	for whyLink in course['whyLinks']:
+		if 'date' not in whyLink.keys():
+			print whyLink['url']+'would add'
+		else:
+			print whyLink['url']+'wouldnt ass'

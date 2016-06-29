@@ -1,16 +1,30 @@
+import sys
+#sys.path.append('/Users/squeel/sites/brainswole/imports')
+sys.path.append('/home/ubuntu/brainswole/imports')
 from pymongo import MongoClient
-import json
-
-
-with open('courses.json') as data_file:
-    data = json.load(data_file)
+from courseConcepts import *
 
 #connect to mongo
 client = MongoClient('localhost')
 conceptsDb = client.Concepts
 
-name = 'algorithms'
-concepts = data[name]
+name = 'data structures'
+concepts = courseConcepts[name]
 
-doc = {'name':name,'concepts':concepts}
-conceptsDb['courses'].insert(doc)
+doc = {'name':name,'concepts':concepts,'whyLinks':[]}
+
+if conceptsDb['courses'].find_one({'name':name}):
+	print name+' already added'
+else:
+	conceptsDb['courses'].insert(doc)
+	print name+' added to courses!!'
+
+'''
+###add NEW course and its concepts to database
+for courseName, concepts in courseConcepts.iteritems():
+	if conceptsDb['courses'].find_one({'course':courseName}):
+		pass
+	else:
+		#insert new courseDoc
+		courseDoc = {'name':course['name']}
+'''

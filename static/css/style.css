@@ -49,16 +49,18 @@ td {
 /* course */
 
 #left {
+	height: 500px;
 	float:left;
-	width: 50%;
+	width: 70%;
+	overflow: auto;
 }
 #right {
 	float:right;
-	width: 50%;
+	width: 30%;
 }
 
 #courseLike {
-	padding-left: 10px;
+	padding-left: 170px;
 	padding-right: 4px;
 	padding-bottom: 0px;
 	padding-top: 0px;
@@ -72,6 +74,7 @@ td {
 
 #reportText {
 	font-size: 10px;
+	margin-left: 155px;
 	padding-left: 5px;
 	cursor: pointer;
 	color: blue;

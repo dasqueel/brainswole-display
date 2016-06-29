@@ -1,15 +1,14 @@
-#give every concept that a conceptLinkDoc that doesnt have one
+#give every concept, a conceptLinkDoc that doesnt have one
 #already updates from already made courses
+
+#also adds concept to masterConcepts if not already added
 
 from pymongo import MongoClient
 
 #connect to mongo
 client = MongoClient('localhost')
 conceptsDb = client.Concepts
-
-#linkCol = conceptsDb['conceptLinks']
-
-#courseCol = conceptsDb['courses']
+generalDb = client.ArchiveGeneral
 
 for courseDoc in conceptsDb['courses'].find():
 	courseConcepts = courseDoc['concepts']
@@ -24,6 +23,10 @@ for courseDoc in conceptsDb['courses'].find():
 		else:
 			conceptsDb['conceptLinks'].insert(linkDoc)
 			print 'added '+concept
-
-#insert link to appropiate concept
-#linkCol.update({"name":name},{"$push",{"practice":link}})
+			#add concept to master list if it is not already added
+			masterConcepts = generalDb['general'].find_one({'doc':'general'})['masterConcepts']
+			if concept not in masterConcepts:
+				generalDb['general'].update({'doc':'general'},{'$push':{'masterConcepts':concept}})
+				print 'pushed '+concept+' into masterConcepts'
+			else:
+				print concept+' already in masterConcepts'

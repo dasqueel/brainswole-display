@@ -49,7 +49,10 @@ courseConcepts = {
 		'markov chains',
 		'probability',
 		'permutations',
-		'combinations'
+		'combinations',
+		'sample space',
+		'conditional probability',
+		'random variables'
 	],
 
 	"algorithms" : [
@@ -70,6 +73,32 @@ courseConcepts = {
 	    "b trees",
 	    "range trees",
 	    "interval trees",
-	    "dijkstras algorithm"
+	    "dijkstras algorithm",
+	    "o notation",
+	    "selection sort",
+	    "recursion",
+	    "towers of hanoi",
+	    "breadth first",
+	    "depth first"
+	    "avl trees",
+	    "avl sort",
+	    "computational complexity"
+	],
+
+	"data structures" : [
+		"linked list",
+		"stack",
+		"queue",
+		"binary tree",
+		"binary search tree",
+		"heap",
+		"hashing",
+		"graph",
+		"array",
+		"matrix"
+	],
+	"discrete mathematics" : [
+		"truth table",
+		"de morgans law"
 	]
 }
