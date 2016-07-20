@@ -166,18 +166,21 @@ def login():
     elif request.method == 'POST':
         email = request.form['email']
 
-        #get userName from email
-        userName = None
-        for user in userNameEmails:
-            if user['email'] == email:
-                userName = str(user['userName'])
-        userDoc = userDb[userName].find_one({'userName':userName})
         #check to see if email is registered
         if email not in registeredEmails:
             error = email+' is not registered.'
             return render_template('login.html',error=error)
+
         #proceed to checking password
         else:
+
+            #get userName from email
+            userName = None
+            for user in userNameEmails:
+                if user['email'] == email:
+                    userName = str(user['userName'])
+            userDoc = userDb[userName].find_one({'userName':userName})
+
             pwd = request.form['pwd']
             userDoc = userDb[userName].find_one({'userName':userName})
             hashpwd = userDoc['pwd']
@@ -187,7 +190,6 @@ def login():
                 return render_template('login.html',error=error)
             else:
                 #creating the session
-
                 user = User(userName,email,userDoc['firstName'])
 
                 flask_login.login_user(user)
@@ -197,7 +199,7 @@ def login():
 
 @app.route('/')
 def index():
-    return redirect(url_for('home'))
+    return redirect(url_for('courses'))
 
 @app.route('/courses')
 @flask_login.login_required
@@ -206,7 +208,7 @@ def courses():
     courseCol = conceptsDb['courses'].find()
     for doc in courseCol:
         courses.append(doc['name'])
-    return render_template('courses.html', courses=courses)
+    return render_template('courses1.html', courses=courses)
 
 @app.route('/course/<course>')
 @flask_login.login_required
@@ -731,6 +733,7 @@ def importProvider():
 def profile(userName):
     #get userDoc and display users information
     userCol = userDb[userName]
+    firstName = userCol.find_one({'userName':userName})['firstName']
 
     #grab all of users conceptLinkObjs
     userConceptDocs = userCol.find({"concept":{'$exists': True}})
@@ -750,7 +753,7 @@ def profile(userName):
                 courses[course].append(conceptDoc)
     #get users recent concepts
     conceptObjs.sort(key=lambda item:item['lastVisit'], reverse=True)
-    return render_template('profile3.html', courses=courses, conceptObjs=conceptObjs)
+    return render_template('profile3.html', courses=courses, conceptObjs=conceptObjs,firstName=firstName,userName=userName)
 
 @app.route('/<userName>/concept/<concept>')
 def usersConcept(userName,concept):

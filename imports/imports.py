@@ -7,6 +7,7 @@ from conceptMap import *
 from courseConcepts import *
 import datetime
 import re
+import requests
 
 #connect to mongo
 client = MongoClient('localhost')
@@ -122,3 +123,14 @@ def khan(userName):
                             userDb[userName].insert(doc)
         return redirect(url_for('imports'))
 
+#codewars
+def codewars(brainswoleUserName,providerUsername):
+    r = requests.get('https://www.codewars.com/api/v1/users/'+providerUsername)
+
+    resp = r.json()
+    langs = resp['ranks']['languages']
+    #update lang(concept) doc
+    for k,v in langs.iteritems():
+        #import lang to langConceptDoc
+        statusStr = 'codewars score:'+str(v['score'])+' | rank: '+v['name']
+        userDb[brainswoleUserName].update({'concept':str(k)},{'$push':{'practice':statusStr}})

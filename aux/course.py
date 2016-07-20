@@ -7,8 +7,9 @@ from courseConcepts import *
 #connect to mongo
 client = MongoClient('localhost')
 conceptsDb = client.Concepts
+generalDb = client.ArchiveGeneral
 
-name = 'data structures'
+name = 'object oriented programming'
 concepts = courseConcepts[name]
 
 doc = {'name':name,'concepts':concepts,'whyLinks':[]}
@@ -19,12 +20,13 @@ else:
 	conceptsDb['courses'].insert(doc)
 	print name+' added to courses!!'
 
-'''
-###add NEW course and its concepts to database
-for courseName, concepts in courseConcepts.iteritems():
-	if conceptsDb['courses'].find_one({'course':courseName}):
-		pass
-	else:
-		#insert new courseDoc
-		courseDoc = {'name':course['name']}
-'''
+#update masterConcepts from courseConcepts
+newMaster = []
+
+for course,concepts in courseConcepts.iteritems():
+	for concept in concepts:
+		if concept not in newMaster:
+			newMaster.append(concept)
+
+generalDb['general'].update({'doc':'general'},{'$set':{'masterConcepts':newMaster}})
+print 'updated masterConcepts'

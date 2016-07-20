@@ -1,8 +1,7 @@
 from pymongo import MongoClient
 from courseConcepts import *
 
-#client = MongoClient('localhost')
-client = MongoClient('mongodb://neil:squ33ler@52.24.174.234/admin')
+client = MongoClient('localhost')f
 generalDb = client.ArchiveGeneral
 
 #update masterConcepts from courseConcepts

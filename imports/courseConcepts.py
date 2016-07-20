@@ -52,7 +52,15 @@ courseConcepts = {
 		'combinations',
 		'sample space',
 		'conditional probability',
-		'random variables'
+		'random variables',
+		'bayes rule',
+		'continuous variables',
+		'discrete variables',
+		'weak law of large numbers',
+		'law of large numbers',
+		'bernoulli process',
+		'poisson process',
+		'central limit theorem'
 	],
 
 	"algorithms" : [
@@ -100,5 +108,24 @@ courseConcepts = {
 	"discrete mathematics" : [
 		"truth table",
 		"de morgans law"
+	],
+	"programming languages" : [
+		"python",
+		"ruby",
+		"javascript",
+		"c#",
+		".net",
+		"rails",
+		"nodejs",
+		"c++",
+		"c",
+		"java",
+		"haskell",
+		"go",
+		"php",
+		"rust"
+	],
+	"object oriented programming" : [
+		"inheritance"
 	]
 }
