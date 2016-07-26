@@ -703,9 +703,10 @@ def imports():
     if request.method == 'GET':
         userName = flask_login.current_user.userName
         imported = []
-        provList = ['khan']
-        providers = [{'name':'Khan Academy','varName':'khan'}]
+        provList = ['khan','codeWars']
+        providers = [{'name':'Khan Academy','varName':'khan'},{'name':'Codewars','varName':'codeWars'}]
 
+        #seperate imported and non-imported providers
         userDoc = userDb[userName].find_one({'userName':userName})
         for imprt in userDoc['imported']:
             if imprt['provider'] in provList:
@@ -717,17 +718,42 @@ def imports():
         return render_template('import2.html',imported=imported,providers=providers)
     elif request.method == 'POST':
         provider = request.form.get("provider")
-        khan(flask_login.current_user.userName)
+        providerUserName = request.form.get("providerUserName")
+        if provider == 'khan':
+            khan(flask_login.current_user.userName)
+        elif provider == 'codeWars':
+            codewars(brainswoleUserName,providerUsername)
         return 'Khan Academy experience updated!'
-        #return provider
 
 @app.route('/importProvider')
 @flask_login.login_required
 def importProvider():
-    #provider = request.form['provider']
     provider = request.args.get("provider")
     if provider == 'khan':
         return khan(flask_login.current_user.userName)
+    elif provider == 'codeWars':
+        #add codeWars to users imported, if not already
+        userName = str(flask_login.current_user.userName)
+        imported = userDb[userName].find_one({'userName':userName})['imported']
+        if filter(lambda prov: prov['provider'] == 'codeWars', imported) == []:
+            #push codeWars into imported, might throw error for other providers since other imports are dictTypeObjs
+            provDoc = {'provider':'codeWars'}
+            userDb[userName].update({'userName':userName}, {'$push':{'imported':provDoc}})
+
+        provUsername = request.args.get("username")
+        return codewars(flask_login.current_user.userName, provUsername)
+
+@app.route('/import/username')
+@flask_login.login_required
+def getUserNameImport():
+    #get variable provider
+    provider = request.args.get("provider")
+    #provider varName and regName map
+    nameMap = {'codeWars':'Codewars'}
+    regName = None
+    if provider in nameMap.keys():
+        regName = nameMap[provider]
+    return render_template('getUserName.html',provider=provider,regName=regName)
 
 @app.route('/profile/<userName>')
 def profile(userName):
@@ -746,10 +772,12 @@ def profile(userName):
         for course in conceptDoc['courses']:
             if course not in courses.keys():
                 courses[course] = []
+
         conceptObjs.append(conceptDoc)
         #get users concepts in their courses
         for course, courseList in courseConcepts.iteritems():
             if conceptDoc['concept'] in courseList:
+                #print conceptDoc['concept'], course
                 courses[course].append(conceptDoc)
     #get users recent concepts
     conceptObjs.sort(key=lambda item:item['lastVisit'], reverse=True)

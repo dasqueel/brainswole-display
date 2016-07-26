@@ -23,7 +23,13 @@
 
 $( "button" ).click(function() {
 	var provider = $(this).val();
-	window.location.href = "importProvider?provider="+provider;
+	if (provider == 'khan') {
+		window.location.href = "importProvider?provider="+provider;
+	}
+	else if (provider == 'codeWars') {
+		window.location.href = "import/username?provider="+provider;
+	}
+
 	//alert(provider)
 	/*
 	$.post( "importProvider", { provider: provider })

@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div align='center'>
+	<p>enter your {{regName}} username</p>
+	<input type='text' id='username'></input>
+	<input type='submit' name='submit' id='submit'></input>
+</div>
+
+<script type="text/javascript">
+
+$('#submit').click( function() {
+	var username = $('#username').val()
+	var provider = "{{provider}}";
+	window.location.href = "../importProvider?provider="+provider+"&username="+username;
+	/*
+	$.post( "../importProvider", { provider: provider, username:  username})
+	  .done(function( data ) {
+	  	//$('#loading').hide();
+	  	alert('posted');
+	    alert( data );
+	  });*/
+})
+
+</script>
+
+{% endblock %}
