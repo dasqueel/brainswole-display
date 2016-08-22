@@ -9,7 +9,7 @@ client = MongoClient('localhost')
 conceptsDb = client.Concepts
 generalDb = client.ArchiveGeneral
 
-name = 'object oriented programming'
+name = 'web development'
 concepts = courseConcepts[name]
 
 doc = {'name':name,'concepts':concepts,'whyLinks':[]}
@@ -20,7 +20,8 @@ else:
 	conceptsDb['courses'].insert(doc)
 	print name+' added to courses!!'
 
-#update masterConcepts from courseConcepts
+
+##update masterConcepts from courseConcepts
 newMaster = []
 
 for course,concepts in courseConcepts.iteritems():

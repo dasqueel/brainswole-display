@@ -127,5 +127,11 @@ courseConcepts = {
 	],
 	"object oriented programming" : [
 		"inheritance"
+	],
+	"web development" : [
+		"api",
+		"oauth",
+		"http",
+		"cookies"
 	]
 }

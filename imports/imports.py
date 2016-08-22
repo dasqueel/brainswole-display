@@ -8,11 +8,37 @@ from courseConcepts import *
 import datetime
 import re
 import requests
+from bs4 import BeautifulSoup
+import traceback
 
 #connect to mongo
 client = MongoClient('localhost')
 conceptsDb = client.Concepts
 userDb = client.ArchiveUsers
+
+#helper functions
+#return a concepts relevant courses -- type = list
+def getConceptsCourses(concept, courseConcepts):
+    courses = []
+    for courseName, courseConcepts in courseConcepts.iteritems():
+        if concept in courseConcepts:
+            courses.append(courseName)
+    return courses
+
+#helper function to remove a given usernames data (when user changes username for their provider profile)
+def removeProvData(userName, provUsername, provider,conceptMap):
+    #loop through all userConceptDocs and check for providers data entry, could also perform a smart list to search for
+    for concept in conceptMap:
+        #print 'start for conceptmap'
+        userConceptDoc = userDb[userName].find_one({'concept':concept,'practice.provider':provider})
+        if userConceptDoc:
+            userDb[userName].update({'concept':concept},{'$pull':{'practice':{'provider':provider}}},upsert=False, multi=True)
+            #should delete userConceptDoc if its empty with practice, explanations, demos
+            userConceptDoc = userDb[userName].find_one({'concept':concept})
+            if userConceptDoc['practice'] == [] and userConceptDoc['explanations'] == [] and userConceptDoc['demos'] == []:
+                #delete the userConceptDoc since its empty
+                print 'here'
+                userDb[userName].remove({"concept":concept})
 
 #khanacademy
 def khan(userName):
@@ -28,7 +54,6 @@ def khan(userName):
         else:
             pass
     if access_token == None:
-        print 'start of request token'
         #get an access token
         #start request token process
         consumer = OAuthConsumer('9YrRjqYAjMWWF7ZP','Y45DZt2vCGV9w8W2')
@@ -51,6 +76,9 @@ def khan(userName):
                 http_url="https://www.khanacademy.org/api/v1/user/exercises"
                 )
         oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), consumer, access_token)
+
+        #if request is good, remove prior khanUserNames data#
+        removeProvData(userName,khanUsername,'khan','khanMap')
 
         resp = urllib2.urlopen(oauth_request.to_url())
         response = resp.read()
@@ -124,14 +152,21 @@ def khan(userName):
         return redirect(url_for('imports'))
 
 #codewars
+#remember to remove all languages if user changes codewars usernames
 def codewars(brainswoleUserName,providerUsername):
     r = requests.get('https://www.codewars.com/api/v1/users/'+providerUsername)
     if r.status_code == 404:
         error = providerUsername+' does not exist in Codewars database :('
         #return render_template('')
         return url_for('imports', error=error)
+
+    #if request is good, remove prior codeWarsUserNames data#
+    #have to make a codeWars map and design codewars importing design
+    #removeProvData(userName,providerUsername,'codeWars','khanMap')
+
     resp = r.json()
     langs = resp['ranks']['languages']
+
     #update lang(concept) doc
     for langName,v in langs.iteritems():
         #import lang to langConceptDoc
@@ -173,3 +208,47 @@ def codewars(brainswoleUserName,providerUsername):
             userDb[brainswoleUserName].update({'concept':str(langName), 'practice.provider':'codeWars'},{'$set':{'practice.$.title':statusStr}})
 
         return redirect(url_for('imports'))
+
+#scrape codecamey for skills
+#remember to remove all skills if user changes codecadey usernames
+def codecad(brainswoleUserName,codecadUsername):
+    #get users code cad skills and add them to appropiate concept docs
+    url = 'http://codecademy.com/'+codecadUsername
+
+    r = requests.get(url)
+
+    # Turn the HTML into a Beautiful Soup object
+    soup = BeautifulSoup(r.text, 'html.parser')
+    try:
+        #if request is good, remove prior codeCadUserNames data#
+        removeProvData(brainswoleUserName,codecadUsername,'codeCad',codeCadMap)
+        for row in soup.findAll("h5", { "class" : "text--ellipsis" }):
+            for concept, conceptList in codeCadMap.iteritems():
+                if row.text in conceptList:
+                    #add skill if it hasnt been added before
+                    #create new conceptdoc if not created
+                    if userDb[brainswoleUserName].find_one({'concept':concept}):
+                        #check to see if row.text is in users concept doc pratice
+                        codeCadPractMods = userDb[brainswoleUserName].find_one({'concept':concept})['practice']
+                        #add new codeCad practMod/skill
+                        if filter(lambda codeCadObj: codeCadObj['provider'] == 'codeCad' and codeCadObj['title'] == 'Codecademy: '+row.text, codeCadPractMods) == []:
+                            skillObj = {'provider':'codeCad','title':'Codecademy: '+row.text}
+                            #push new skillObj
+                            userDb[brainswoleUserName].update({'concept':concept},{'$push':{'practice':skillObj}})
+                    #creat new conceptDoc
+                    else:
+                        doc = {
+                            'concept':concept,
+                            'lastVisit':datetime.datetime.utcnow(),
+                            'practice':[{'provider':'codeCad','title':'Codecademy: '+row.text}],
+                            'explanations':[],
+                            'courses':getConceptsCourses(concept,courseConcepts),
+                            'demos':[]
+                        }
+                        userDb[brainswoleUserName].insert(doc)
+    except:
+        print traceback.print_exc()
+        pass
+
+    return redirect(url_for('imports'))
+

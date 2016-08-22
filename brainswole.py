@@ -697,16 +697,16 @@ def archived():
     else:
         pass
 
-@app.route('/import', methods=['GET','POST'])
+@app.route('/import', methods=['GET'])
 @flask_login.login_required
 def imports():
     if request.method == 'GET':
         userName = flask_login.current_user.userName
         imported = []
-        provList = ['khan','codeWars']
-        providers = [{'name':'Khan Academy','varName':'khan'},{'name':'Codewars','varName':'codeWars'}]
+        provList = ['khan','codeWars','codeCad']
+        providers = [{'name':'Khan Academy','varName':'khan'},{'name':'Codewars','varName':'codeWars'},{'name':'Codecademy','varName':'codeCad'}]
 
-        #seperate imported and non-imported providers
+        #seperate already imported and non-imported providers
         userDoc = userDb[userName].find_one({'userName':userName})
         for imprt in userDoc['imported']:
             if imprt['provider'] in provList:
@@ -716,14 +716,6 @@ def imports():
                 providers[:] = [d for d in providers if d.get('varName') != imprt['provider']]
 
         return render_template('import2.html',imported=imported,providers=providers)
-    elif request.method == 'POST':
-        provider = request.form.get("provider")
-        providerUserName = request.form.get("providerUserName")
-        if provider == 'khan':
-            khan(flask_login.current_user.userName)
-        elif provider == 'codeWars':
-            codewars(brainswoleUserName,providerUsername)
-        return 'Khan Academy experience updated!'
 
 @app.route('/importProvider')
 @flask_login.login_required
@@ -735,13 +727,30 @@ def importProvider():
         #add codeWars to users imported, if not already
         userName = str(flask_login.current_user.userName)
         imported = userDb[userName].find_one({'userName':userName})['imported']
+        #providers username
+        provUsername = request.args.get("username")
         if filter(lambda prov: prov['provider'] == 'codeWars', imported) == []:
             #push codeWars into imported, might throw error for other providers since other imports are dictTypeObjs
-            provDoc = {'provider':'codeWars'}
+            provDoc = {'provider':'codeWars','userName':provUsername}
             userDb[userName].update({'userName':userName}, {'$push':{'imported':provDoc}})
 
-        provUsername = request.args.get("username")
         return codewars(flask_login.current_user.userName, provUsername)
+    elif provider == 'codeCad':
+        #add codeWars to users imported, if not already
+        userName = str(flask_login.current_user.userName)
+        imported = userDb[userName].find_one({'userName':userName})['imported']
+        #providers username
+        provUsername = request.args.get("username")
+        #search if codeCad has been added to usersDoc['imported']
+        if filter(lambda prov: prov['provider'] == 'codeCad', imported) == []:
+            #push codeWars into imported, might throw error for other providers since other imports are dictTypeObjs
+            provDoc = {'provider':'codeCad','userName':provUsername}
+            userDb[userName].update({'userName':userName}, {'$push':{'imported':provDoc}})
+        #else reupdate the new codeCad userName
+        else:
+            userDb[userName].update({'userName':userName, 'imported.provider': 'codeCad'}, {'$set':{'imported.$.userName':provUsername}})
+
+        return codecad(flask_login.current_user.userName, provUsername)
 
 @app.route('/import/username')
 @flask_login.login_required
@@ -749,7 +758,7 @@ def getUserNameImport():
     #get variable provider
     provider = request.args.get("provider")
     #provider varName and regName map
-    nameMap = {'codeWars':'Codewars'}
+    nameMap = {'codeWars':'Codewars','codeCad':'Codecademy'}
     regName = None
     if provider in nameMap.keys():
         regName = nameMap[provider]

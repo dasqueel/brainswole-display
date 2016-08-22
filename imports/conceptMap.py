@@ -65,4 +65,15 @@ khanMap = {
 	'combinations':['permutations_and_combinations_2','combinations_1','probability_with_perm_comb']
 }
 
-codecademyMap = {}
+codeCadMap = {
+	'api':['YouTube API','NHTSA API','Twitter API','Evernote API','SoundCloud API','SendGrid API','NPR API'],
+	'python':[],
+	'java':['Learn Java'],
+	'php':['PHP'],
+	'ruby':['Ruby','Ruby on Rails: Authentication'],
+	'jquery':['jQuery'],
+	'sql':['Learn SQL','SQL: Table Transformation'],
+	'html':['HTML & CSS'],
+	'css':['HTML & CSS'],
+	'javascript':['JavaScript']
+}

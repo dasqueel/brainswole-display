@@ -1,23 +1,56 @@
-from rauth import OAuth2Service
+#codeCadPractMods = [{'provider':'codeCad','title':'test1'},{'provider':'codeCad','title':'test2'}]
 
-fitbit = OAuth2Service(
-    client_id='229DZQ',
-    client_secret='a7a3b415cd5847f4835ed61b3f425022',
-    name='fitbit',
-    authorize_url='https://www.fitbit.com/oauth2/authorize',
-    access_token_url='https://www.fitbit.com/oauth2/access_token',
-    base_url='https://api.fitbit.com/')
+#print filter(lambda langObj: langObj['provider'] == 'codeCad' and langObj['title'] == 'test1', codeCadPractMods)
 
-# the return URL is used to validate the request
-params = {'redirect_uri': 'http://127.0.0.1:5000/import',
-          'response_type': 'code'}
-url = fitbit.get_authorize_url(**params)
+from pymongo import MongoClient
+client = MongoClient('localhost')
+conceptsDb = client.Concepts
+userDb = client.ArchiveUsers
 
-# once the above URL is consumed by a client we can ask for an access
-# token. note that the code is retrieved from the redirect URL above,
-# as set by the provider
-data = {'code': 'foobar',
-        'grant_type': 'authorization_code',
-        'redirect_uri': 'http://127.0.0.1:5000/import'}
-session = fitbit.get_auth_session(data=data)
-#session = service.get_auth_session(data=data)
+'''
+codecademyMap = {
+	'api':['YouTube API','NHTSA API','Twitter API','Evernote API','SoundCloud API','SendGrid API','NPR API'],
+	'python':[],
+	'java':['Learn Java'],
+	'php':['PHP'],
+	'ruby':['Ruby','Ruby on Rails: Authentication'],
+	'jquery':['jQuery'],
+	'sql':['Learn SQL','SQL: Table Transformation'],
+	'html':['HTML & CSS'],
+	'css':['HTML & CSS'],
+	'javascript':['JavaScript']
+}
+#helper function to remove a given usernames data (when user changes username for their provider profile)
+def removeProvData(userName, provUsername, provider,conceptMap):
+    #loop through all userConceptDocs and check for providers data entry, could also perform a smart list to search for
+    for concept in conceptMap:
+        if userDb[userName].find_one({'concept':concept,'practice.provider':provider}):
+            userDb[userName].update({'concept':concept},{'$pull':{'practice':{'provider':provider}}},upsert=False, multi=True)
+
+removeProvData('testmctesty','dasqueel','codeCad',codecademyMap)
+#upsert=False, multi=True
+
+userConceptDoc = userDb['testmctesty'].find_one({'concept':'ruby'})
+
+if userConceptDoc['practice'] == [] and userConceptDoc['explanations'] == [] and userConceptDoc['demos'] == []:
+    #delete the userConceptDoc since its empty
+    print 'here'
+    userDb['testmctesty'].remove({"concept":'ruby'})
+else:
+	print 'nope'
+'''
+
+from bs4 import BeautifulSoup
+import requests
+
+url = 'http://codecademy.com/dasqueel'
+
+r = requests.get(url)
+
+# Turn the HTML into a Beautiful Soup object
+soup = BeautifulSoup(r.text, 'html.parser')
+for row in soup.findAll("h5", { "class" : "text--ellipsis" }):
+	print row.text
+
+
+

@@ -1,4 +1,4 @@
-#update existing courses with their new concepts
+###update existing courses with their new concepts
 
 from courseConcepts import *
 from pymongo import MongoClient

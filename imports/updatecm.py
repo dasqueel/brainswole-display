@@ -15,4 +15,4 @@ def insertKhanResource(concept,resourceList):
 		khanMap[concept] = resourceList
 		print 'created '+concept+' key and its resource list'
 
-insertKhanResource('empirical rule',['empirical_rule'])
+#insertKhanResource('empirical rule',['empirical_rule'])
