@@ -21,7 +21,7 @@ body {
 <h2>Practice experience</h2>
 {% for link in practlinks %}
 
-<a href="http://{{ link['url'] }}" target='_blank'>{{ link['title'] }} || correct: {{link['probsCorrect']}} attempted: {{link['probsAttempted']}}</a><br>
+<a href="http://{{ link['url'] }}" target='_blank'>{{ link['title'] }}</a><br>
 
 {% endfor %}
 

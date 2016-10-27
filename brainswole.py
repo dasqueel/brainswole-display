@@ -10,6 +10,8 @@ from imports.imports import *
 from imports.courseConcepts import *
 from oauth import *
 from stuff import *
+from helpers import *
+from itertools import chain
 
 app = flask.Flask(__name__)
 app.secret_key = aaabbbbccc
@@ -31,6 +33,7 @@ client = MongoClient('localhost')
 conceptsDb = client.Concepts
 userDb = client.ArchiveUsers
 generalDb = client.ArchiveGeneral
+tubeTestDb = client.TubeTest
 
 class User(flask_login.UserMixin):
     def __init__(self, userName, email, firstName):
@@ -199,7 +202,7 @@ def login():
 
 @app.route('/')
 def index():
-    return redirect(url_for('courses'))
+    return redirect(url_for('imports'))
 
 @app.route('/courses')
 @flask_login.login_required
@@ -208,7 +211,7 @@ def courses():
     courseCol = conceptsDb['courses'].find()
     for doc in courseCol:
         courses.append(doc['name'])
-    return render_template('courses1.html', courses=courses)
+    return render_template('courses.html', courses=courses)
 
 @app.route('/course/<course>')
 @flask_login.login_required
@@ -233,6 +236,25 @@ def course(course):
     linksWhyNew = sorted(linksWhy, key=lambda k: k['date'], reverse=True)
 
     return render_template('course.html', concepts=concepts, course=course, linksWhy=linksWhy, linksWhyNew=linksWhyNew)
+
+@app.route('/questions/<course>')
+@flask_login.login_required
+def questions(course):
+    courseDoc = conceptsDb['courses'].find_one({'name':course})
+    concepts = courseDoc['concepts']
+
+    #get users added answers urls
+    #{'question':'Why is refactoring useful?','urlObjs':[{'url':'test.com','title':'this is a test'}]}
+    userQuestionDocs = userDb[flask_login.current_user.userName].find({'question':{'$exists': True}})
+
+    #get users added anwers to questions
+    addedAnswers = []
+
+    for questionDoc in userQuestionDocs:
+        if course in questionDoc['courses']:
+            addedAnswers.append({questionDoc['question']:questionDoc['demos']})
+
+    return render_template('questions.html', concepts=concepts, course=course, addedAnswers=addedAnswers)
 
 @app.route('/logout')
 def logout():
@@ -304,6 +326,65 @@ def concept(concept):
         #not a valid concept
         error = concept+' is not a valid concept'
         return render_template('concept.html', concept=concept, error=error)
+
+#add demo for questions
+@app.route('/back/addquestion', methods=['POST'])
+@flask_login.login_required
+def backQuestion():
+    ## code for a url constituting for multipe concepts ##
+    url = request.form.get("url")
+    question = request.form.get("question")
+
+    #add url to users question
+    #see if question doc exists
+    #parse the https:// or http://
+    url = re.sub('https://', '', url)
+    url = re.sub('http://', '', url)
+    url = re.sub('https://www.', '', url)
+    url = re.sub('http://www.', '', url)
+    url = re.sub('www.', '', url)
+    httpLinkUrl = "http://"+url
+    #recalibrate youtube url with /v/
+    url = url.replace('watch?v=','v/')
+
+    #title
+    response = urllib2.urlopen(httpLinkUrl)
+    html = response.read()
+    soup = BeautifulSoup(html, 'html.parser')
+    title = soup.html.head.title.text.strip()
+
+    #linkObj for the question
+    newLinkObj = {"url":url,"title":title}
+
+    #check to see if userQuestionDoc is already inserted
+    if userDb[flask_login.current_user.userName].find_one({'question':question}):
+        #check to see if demo is already added
+        userQuestionDoc = userDb[flask_login.current_user.userName].find_one({'question':question})
+        #print url, userQuestionDoc['demos']
+
+        #check to see if url has already been added
+        if url in [d['url'] for d in userQuestionDoc['demos']]:
+            #demo has already been added
+            return 'already added'
+        else:
+            #add new demo
+            userDb[flask_login.current_user.userName].update({'question':question},{'$push':{'demos':newLinkObj}})
+            return 'added new'
+
+    else:
+        #user hasnt created a userQuestionDoc, create one and insert the url
+        ##### recreate when creating other interview questionaires
+        newUserQuestionDoc = {'question':question,'courses':['back end developer'],'demos':[newLinkObj],'lastVisit':datetime.datetime.utcnow()}
+
+        #add course(s) the concept its part of ** could redo this more efficiently  **
+        for courseName,courseList in courseConcepts.iteritems():
+            if concept in courseList:
+                newUserQuestionDoc['courses'].append(courseName)
+        userDb[flask_login.current_user.userName].insert(newUserQuestionDoc)
+        return 'added new'
+
+    #print question, url
+    #return url
 
 @app.route('/adddemo/<concept>')
 @flask_login.login_required
@@ -772,24 +853,38 @@ def profile(userName):
 
     #grab all of users conceptLinkObjs
     userConceptDocs = userCol.find({"concept":{'$exists': True}})
+    userQuestionDocs = userCol.find({"question":{'$exists': True}})
+    #userDocs = userConceptDocs + userQuestionDocs
     conceptObjs = []
     #get users courses and concepts
     courses = {}
 
-    for conceptDoc in userConceptDocs:
+    #for conceptDoc in userConceptDocs:
+    for conceptDoc in chain(userConceptDocs,userQuestionDocs):
         #get users courses and build courses dict with the keys(course names) and values (list of concepts in course)
         for course in conceptDoc['courses']:
+            #print course
             if course not in courses.keys():
                 courses[course] = []
 
         conceptObjs.append(conceptDoc)
         #get users concepts in their courses
         for course, courseList in courseConcepts.iteritems():
-            if conceptDoc['concept'] in courseList:
-                #print conceptDoc['concept'], course
-                courses[course].append(conceptDoc)
+            try:
+                if conceptDoc['concept'] in courseList:
+                    #print conceptDoc['concept'], course
+                    courses[course].append(conceptDoc)
+            except:
+                continue
+            try:
+                if conceptDoc['question'] in courseList:
+                    #print conceptDoc['concept'], course
+                    courses[course].append(conceptDoc)
+            except:
+                continue
     #get users recent concepts
     conceptObjs.sort(key=lambda item:item['lastVisit'], reverse=True)
+
     return render_template('profile3.html', courses=courses, conceptObjs=conceptObjs,firstName=firstName,userName=userName)
 
 @app.route('/<userName>/concept/<concept>')
@@ -915,6 +1010,96 @@ def importdata():
                 #remove from providers
                 providers[:] = [d for d in providers if d.get('varName') != imprt['provider']]
         return render_template('importdata.html',providers=providers,imported=imported)
+
+@app.route('/testtube/<vidId>')
+@flask_login.login_required
+def testtube(vidId):
+    vidDoc = tubeTestDb['problems'].find_one({'vidId':vidId})
+    userVidDoc = userDb[flask_login.current_user.userName].find_one({'type':'testTube','vidId':vidId})
+    #if first time user visits this videos questions
+    if userVidDoc == None:
+        #create userVidDoc
+        newUserVidDoc = {'vidId':vidId,'type':'testTube','probs':[]}
+        userDb[flask_login.current_user.userName].insert(newUserVidDoc)
+    userVidDoc = userDb[flask_login.current_user.userName].find_one({'type':'testTube','vidId':vidId})
+
+    #get new finished prob
+    userFinishedProbs = userVidDoc['probs']
+    finishedprobIds = [d['id'] for d in userFinishedProbs]
+    #remove finished probs
+    probs = vidDoc['probs']
+    for prob in probs:
+        for userProb in userFinishedProbs:
+            if prob['id'] in userProb.values():
+                #remove that prob
+                probs[:] = [d for d in probs if d.get('id') not in finishedprobIds]
+                #pass
+    if probs == []:
+        prob = vidDoc['probs'][0]
+        return render_template('testtube.html',prob=prob,vidId=vidId)
+    else:
+        prob = probs[0]
+        return render_template('testtube.html',prob=prob,vidId=vidId)
+
+@app.route('/testtube/back/v1', methods=['POST'])
+@flask_login.login_required
+def testtubeback():
+
+    vidId = request.form.get("vidId")
+    probId = request.form.get("probId")
+    probType = request.form.get("probType")
+
+    userVidDoc = userDb[flask_login.current_user.userName].find_one({'type':'testTube','vidId':vidId})
+
+    vidDoc = tubeTestDb['problems'].find_one({'vidId':vidId})
+    probObj = (item for item in vidDoc['probs'] if item["id"] == probId).next()
+    #return 'yup'
+
+    if probType == 'resp':
+        response = request.form.get("resp")
+        userVidDoc = userDb[flask_login.current_user.userName].find_one({'type':'testTube','vidId':vidId})
+        #check to see if prob has already been done
+        userProbObj = None
+        try:
+            userProbObj = (prob for prob in userVidDoc['probs'] if prob["id"] == probId).next()
+        except:
+            pass
+        if userProbObj == None:
+            #add resp to probObj
+            probObj['resp'] = response
+
+            userDb[flask_login.current_user.userName].update({'type':'testTube','vidId':vidId},{'$push':{'probs':probObj}})
+            return 'added response!'
+        else:
+            #update response and set
+            return 'would do but didnt update set'
+
+    if probType == 'freeResp':
+        response = request.form.get("resp")
+        userVidDoc = userDb[flask_login.current_user.userName].find_one({'type':'testTube','vidId':vidId})
+        #check to see if prob has already been done
+        userProbObj = None
+        try:
+            userProbObj = (prob for prob in userVidDoc['probs'] if prob["id"] == probId).next()
+        except:
+            pass
+        if userProbObj == None:
+            #add resp to probObj
+            probObj['correct'] = True
+
+            userDb[flask_login.current_user.userName].update({'type':'testTube','vidId':vidId},{'$push':{'probs':probObj}})
+            return 'added response!'
+        else:
+            #update response and set
+            return 'would do but didnt update set'
+
+    '''
+    #find and return a new problem
+    vidDoc = tubeTestDb['problems'].find_one({'vidId':vidId})
+    probs = vidDoc['probs']
+    prob = probs[2]
+    return render_template('testtube.html',prob=prob)
+    '''
 
 @app.errorhandler(404)
 def page_not_found(e):

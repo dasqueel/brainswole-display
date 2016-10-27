@@ -47,5 +47,75 @@ khanMap = {
 	'optimization problem':['optimization'],
 	'integration by substitution':['integration-by-u-substitution',
 									'integration-using-trigonometric-substitution'],
-	'improper integrals':['improper-integrals']
+	'improper integrals':['improper-integrals'],
+	'expected value':['expected-value-with-empirical-probabilities',
+						'expected-value-with-calculated-probabilities',
+						'making-decisions-with-expected-values',
+						'expected_value'],
+	'standard deviation':['standard_deviation_of_a_population',
+							'standard_deviation'],
+	'empirical':['empirical_rule'],
+	'set notation':['basic_set_notation'],
+	'probability':['probability_with_perm_comb','multiplying-dependent-probabilities','expected-value-with-calculated-probabilities','expected-value-with-empirical-probabilities','using-probability-to-make-fair-decisions','probability_1','finding-probability','understanding-probability','using-probability-to-make-predictions','probability-models','independent_probability','adding-probability','constructing-probability-distributions','dependent_probability','multiplying-dependent-probabilities'],
+	'hypothesis testing':['hypothesis-testing-in-experiments','hypothesis-testing-with-simulations'],
+	'scatter plots':['fitting-functions-to-scatter-plots','constructing-scatter-plots','making-good-scatter-plots','positive-and-negative-linear-correlations-from-scatter-plots','interpreting-scatter-plots'],
+	'linear regression':['linear-models-of-bivariate-data','interpreting-slope-and-y-intercept-of-lines-of-best-fit','plotting_the_line_of_best_fit','correlation-coefficient-intuition'],
+	'variance':['variance'],
+	'permutations':['permutations_and_combinations_2','permutations_1','probability_with_perm_comb'],
+	'combinations':['permutations_and_combinations_2','combinations_1','probability_with_perm_comb'],
+	'vectors':['vectors-and-scalars-questions','vectors-and-scalers---passage-1','vectors-and-scalers---passage-2','equivalent-vectors','components_of_vectors','scaling_vectors','graphically-adding-and-subtracting-vectors','magnitude-of-vectors','unit-vector','adding_vectors','combined-vector-operations','adding-vectors-in-magnitude-and-direction-form','vector-word-problems','multiplying_a_matrix_by_a_vector'],
+	'scalar multiplication':['scaling_vectors'],
+	'adding vectors':['adding_vectors','adding-vectors-in-magnitude-and-direction-form','adding-vectors-in-magnitude-and-direction-form-2','graphically-adding-and-subtracting-vectors','adding-vectors-in-magnitude-and-direction-form'],
+	'unit vectors':['unit-vector'],
+	'determinant':['matrix_determinant','matrix_determinant_3x3'],
+	'matrix':['matrix_dimensions','understand-matrix-coordinates','matrix_addition_and_subtraction','perform-elementary-matrix-row-operations','scalar_matrix_multiplication','solve-matrix-equations-add-sub','solve-matrix-equations-scalar-multiplication','multiplying_a_matrix_by_a_matrix','matrix_determinant','matrix_determinant_3x3','multiplying_a_matrix_by_a_vector','matrix_inverse_3x3','matrix_inverse_2x2','writing-systems-of-equations-as-matrix-equations','represent-systems-with-matrices','determine-inverse-matrices','transform-polygons-with-matrices','determine-invertibile-2x2-matrices','transformation-matrices-1']
+}
+
+khanVidMap = {
+	'matrix' : [
+		'youtube.com/watch?v=0oGJTQCy4cQ',
+		'youtube.com/watch?v=WR9qCSXJlyY',
+		'youtube.com/watch?v=aKhhYguY0DQ',
+		'youtube.com/watch?v=OMA2Mwo0aZg',
+		'youtube.com/watch?v=iUQR0enP7RQ',
+		'youtube.com/watch?v=S4n-tQZnU6o',
+		'youtube.com/watch?v=obts_JDS6_Q',
+		'youtube.com/watch?v=AUqeb9Z3y3k',
+		'youtube.com/watch?v=xyAuNHPsq-g',
+		'youtube.com/watch?v=aKhhYguY0DQ',
+		'youtube.com/watch?v=kT4Mp9EdVqs'
+	],
+	'vectors' : [
+		'youtube.com/watch?v=jCkhbKFZgLk',
+		'youtube.com/watch?v=FaF3v-ezbSk',
+		'youtube.com/watch?v=595Tiga1gIg',
+		'youtube.com/watch?v=ihNZlp7iUHE',
+		'youtube.com/watch?v=8QihetGj3pg',
+		'youtube.com/watch?v=VgqsM-XdBD0',
+		'youtube.com/watch?v=BsBH8nAv5l4',
+		'youtube.com/watch?v=coDfeoi2zcQ',
+		'youtube.com/watch?v=5AWob_z74Ks'
+	],
+	'determinant' : [
+		'youtube.com/watch?v=0c7dt2SQfLw',
+		'youtube.com/watch?v=H9BWRYJNIv4',
+		'youtube.com/watch?v=nu87kfmwNfU',
+		'youtube.com/watch?v=4xFIi0JF2AM',
+		'youtube.com/watch?v=32rdijPB-rA',
+		'youtube.com/watch?v=QV0jsTiobU4',
+		'youtube.com/watch?v=n-S63_goDFg'
+	]
+}
+
+codeCadMap = {
+	'api':['YouTube API','NHTSA API','Twitter API','Evernote API','SoundCloud API','SendGrid API','NPR API'],
+	'python':[],
+	'java':['Learn Java'],
+	'php':['PHP'],
+	'ruby':['Ruby','Ruby on Rails: Authentication'],
+	'jquery':['jQuery'],
+	'sql':['Learn SQL','SQL: Table Transformation'],
+	'html':['HTML & CSS'],
+	'css':['HTML & CSS'],
+	'javascript':['JavaScript']
 }

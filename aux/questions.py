@@ -12,23 +12,10 @@ generalDb = client.ArchiveGeneral
 name = 'Back-End Developer Interview Questions'
 concepts = courseConcepts[name]
 
-doc = {'name':name,'concepts':concepts,'whyLinks':[]}
+doc = {'name':name,'concepts':concepts,'whyLinks':[],'type':'questions'}
 
 if conceptsDb['courses'].find_one({'name':name}):
 	print name+' already added'
 else:
 	conceptsDb['courses'].insert(doc)
 	print name+' added to courses!!'
-
-'''
-##update masterConcepts from courseConcepts
-newMaster = []
-
-for course,concepts in courseConcepts.iteritems():
-	for concept in concepts:
-		if concept not in newMaster:
-			newMaster.append(concept)
-
-generalDb['general'].update({'doc':'general'},{'$set':{'masterConcepts':newMaster}})
-print 'updated masterConcepts'
-'''

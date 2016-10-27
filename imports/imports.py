@@ -10,6 +10,9 @@ import re
 import requests
 from bs4 import BeautifulSoup
 import traceback
+import sys
+sys.path.append("../")
+from helpers import *
 
 #connect to mongo
 client = MongoClient('localhost')
@@ -68,6 +71,7 @@ def khan(userName):
         return redirect(oauth_request.to_url())
     else:
         #update khan academy data
+        ## exercise data ##
         consumer = OAuthConsumer('9YrRjqYAjMWWF7ZP','Y45DZt2vCGV9w8W2')
         access_token = OAuthToken.from_string(access_token)
         oauth_request = OAuthRequest.from_consumer_and_token(
@@ -149,6 +153,56 @@ def khan(userName):
 
                             #insert the doc
                             userDb[userName].insert(doc)
+
+        ## video data ##
+        #consumer = OAuthConsumer('9YrRjqYAjMWWF7ZP','Y45DZt2vCGV9w8W2')
+        #access_token = OAuthToken.from_string(access_token)
+        print 'doing khan vids'
+        oauth_request = OAuthRequest.from_consumer_and_token(
+                consumer,
+                token=access_token,
+                http_url="https://www.khanacademy.org/api/v1/user/videos"
+                )
+        oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), consumer, access_token)
+
+        resp = urllib2.urlopen(oauth_request.to_url())
+        response = resp.read()
+        respJson = json.loads(response)
+        for vid in respJson:
+            #if vid['completed'] == True:
+                #add video to users explanations
+            khanTubeUrl = vid['video']['url'].replace("&feature=youtube_gdata_player", "") #simple youtube url for video
+            khanTubeUrl = khanTubeUrl.replace("http://www.", "") #simple youtube url for video
+            for conceptNorm,vidList in khanVidMap.iteritems():
+                if khanTubeUrl in vidList:
+                    #check to see if user has already made conceptDoc for the concept
+                    userConceptDoc = userDb[userName].find_one({'concept':conceptNorm})
+                    #if userConceptDoc exists, add expUrl
+                    if userConceptDoc:
+                        #add khanTubeUrl into users conceptdocs explanations
+                        #create possible new explObj
+                        explObj = explMaker(khanTubeUrl)
+                        userDb['neilbarduson'].update({'concept':conceptNorm,'explanations.url': {'$ne': khanTubeUrl}},{'$push':{'explanations':explObj}})
+                    #else create a userConceptDoc for the concept
+                    else:
+                        explObj = explMaker(khanTubeUrl)
+
+                        doc = {
+                            'concept':conceptNorm,
+                            'lastVisit':datetime.datetime.utcnow(),
+                            'practice':[],
+                            'explanations':[explObj],
+                            'courses':[],
+                            'demos':[]
+                        }
+                        #add course(s) the concept its part of ** could redo this more efficiently  **
+                        for courseName,courseList in courseConcepts.iteritems():
+                            if conceptNorm in courseList:
+                                doc['courses'].append(courseName)
+
+                        #insert the doc
+                        userDb[userName].insert(doc)
+
         return redirect(url_for('imports'))
 
 #codewars
@@ -252,3 +306,4 @@ def codecad(brainswoleUserName,codecadUsername):
 
     return redirect(url_for('imports'))
 
+#a listing of providers concept modules

@@ -1,0 +1,132 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+{% if prob['type'] == 'resp' %}
+
+<div align='center'>
+
+  <p>{{ prob['question'] }}</p>
+  <br>
+
+  <textarea id="resp" rows="4" cols="50" placeholder="enter response here..."></textarea>
+  <button onclick="enterResp()">enter</button>
+
+  <p id="demo"></p>
+  <br>
+</div>
+
+{% elif prob['type'] == 'multi' %}
+
+<div align='center'>
+
+	<p>{{ prob['question'] }}</p>
+	<br>
+
+	{% for choice in prob['choices'] %}
+  {{choice}}<br>
+  {% endfor %}
+	<button onclick="checkAnswer()">check</button>
+
+	<p id="demo"></p>
+	<br>
+</div>
+
+{% elif prob['type'] == 'freeResp' %}
+
+<div align='center'>
+
+  <p>{{ prob['question'] }}</p>
+  <br>
+
+  <textarea id="resp" rows="3" cols="50" placeholder="enter response here..."></textarea>
+  <button onclick="checkFree()">enter</button>
+
+  <p id="demo"></p>
+  <br>
+</div>
+
+{% endif %}
+
+<script>
+
+var probType = "{{prob['type']}}"
+var vidId = "{{vidId}}";
+var probId = "{{prob['id']}}";
+
+function enterResp() {
+  var resp = $('#resp').val();
+  $.post( "http://127.0.0.1:5000/testtube/back/v1", { vidId: vidId, probId: probId, probType: probType, resp: resp } )
+    .done(function( data ) {
+      //alert( "Data Loaded: " + data );
+      //if answer is correct, get new prob
+      //if (data)
+      alert(data);
+      location.reload();
+    });
+}
+
+var accecptable = ['dom'];
+function checkFree() {
+  var resp = $('#resp').val();
+  if (accecptable.indexOf(resp) >= 0) {
+      //do something
+      $.post( "http://127.0.0.1:5000/testtube/back/v1", { vidId: vidId, probId: probId, probType: probType, resp: resp } )
+      .done(function( data ) {
+            //alert( "Data Loaded: " + data );
+            //if answer is correct, get new prob
+            alert(data);
+            location.reload();
+          });
+  }
+  else {
+    alert('whoops try again');
+  }
+}
+
+
+/*
+function checkAnswer(probType) {
+    //var answer = {{ prob['answer'] }};
+    var answerList = {{ prob['answerList']|safe }};
+    var probId = "{{ prob['id'] }}";
+    var concept = "{{ prob['concept'] }}";
+    var usersAnswer = document.getElementById('usersAnswer').value;
+
+    if (jQuery.inArray(usersAnswer, answerList) != -1) {
+        document.getElementById("demo").innerHTML = 'solid work ';
+        //post outcome
+        $.post( "problem", { outcome: "correct", probId: probId, concept: concept })
+          .done(function( data ) {
+              alert( data );
+              newProblem();
+            });
+    }
+    else {
+        document.getElementById("demo").innerHTML = 'whoops try again';
+        //post outcome
+        $.post( "problem", { outcome: "incorrect", probId: probId, concept: concept })
+          .done(function( data ) {
+              alert( data );
+            });
+    }
+
+
+}
+
+function newProblem() {
+    //location.reload();
+    //ajax to get new prob
+    var vidId = "{{vidId}}";
+    var probId = "{{probId}}";
+    $.post( "https://brainswole.com/testtube/getprob", { vidId: vidId, probId: probId } )
+      .done(function( data ) {
+        //alert( "Data Loaded: " + data );
+        //if answer is correct, get new prob
+        //if (data)
+      });
+*/
+</script>
+
+
+{% endblock %}

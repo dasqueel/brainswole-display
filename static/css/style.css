@@ -19,6 +19,17 @@ body {
 	margin-left: 70px;
 }
 
+.footer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 1rem;
+  background-color: #efefef;
+  text-align: center;
+  margin-top: 5em;
+}
+
 td {
     padding-top: .5em;
     padding-bottom: .5em;
@@ -57,6 +68,14 @@ td {
 #right {
 	float:right;
 	width: 30%;
+	overflow: auto;
+	padding-bottom: 5em;
+}
+#questions {
+	float:left;
+	width: 80%;
+	overflow: auto;
+	margin-left: 5em;
 }
 
 #courseLike {

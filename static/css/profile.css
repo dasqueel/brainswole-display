@@ -13,6 +13,7 @@ body {
 	width:80%;
 	height:100%;
 	margin: 0 auto;
+	margin-top: 4em;
 }
 
 #pract {
@@ -26,7 +27,8 @@ body {
 }
 
 #accordion{
-	width: 50%;
+	width: 65%;
 	margin-left: auto;
 	margin-right: auto;
 }
+

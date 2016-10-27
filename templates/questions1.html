@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jQuery UI Accordion - Default functionality</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script>
+  $( function() {
+    $( "#accordion" ).accordion({
+      collapsible: true,
+      active: false
+    });
+  } );
+  </script>
+  <style type="text/css">
+    .questionUrl {
+      width: 70%;
+    }
+  </style>
+</head>
+
+<div align='center'>
+  <h3>{{course}}</h3>
+</div>
+
+
+<div id='questions'>
+
+  <h5>questions:</h5>
+
+  <div id="accordion">
+    {% for concept in concepts %}
+    <h3>{{ concept }}</h3>
+    <div>
+        <input type="text" class="questionUrl" id="{{loop.index0}}" name="url" placeholder="resource url...">
+        <input type="hidden" name="question" value="{{concept}}"/>
+        <button onClick="postQuest({{loop.index0}},'{{concept}}')">add</button>
+        <div id='p{{loop.index0}}'>
+          <h5>added answers:</h5>
+          {% for answer in addedAnswers %}
+          {% for question, answerObjs in answer.iteritems() %}
+          {% if question == concept %}
+          {% for answerObj in answerObjs %}
+          <a href="http://{{answerObj['url']}}" target="_blank">{{answerObj['title']}}</a>
+          {% endfor %}
+          {% endif %}
+          {% endfor %}
+          {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<script type="text/javascript">
+
+function postQuest(index,question) {
+  var url = $('#'+index).val();
+
+  $.post( "../back/addquestion", { url: url, question: question })
+    .done(function( data ) {
+      if (data == 'already added') {
+        alert('this url has already been added');
+      }
+      else if (data == 'added new') {
+        $("#p"+index).append( "<p>"+url+"</p>" );
+      }
+    });
+}
+
+</script>
+
+
+{% endblock %}

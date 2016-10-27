@@ -1,35 +1,24 @@
-<table id="courseTable">
-   <tr>
-      <th>Concept</th>
-      <th id="pract">Explanations</th>
-      <th id="pract">Practice</th>
-   </tr>
-   {% for concept in courses["programming languages"] %}
-   <tr>
-      <td id="concept">{{ concept["concept"] }}</td>
-      <td id="pract">
-         <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">{{concept["explanations"]|length}} <span class="caret"></span></button>
-            <ul class="dropdown-menu">
-               {% for link in concept["explanations"] %}
-               <li><a href="http://{{ link["url"] }}" target="_blank">{{ link["title"] }}</a></li>
-               {% endfor %}
-            </ul>
-         </div>
-      </td>
-      <td id="pract">
-         <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">{{concept["practice"]|length+concept["demos"]|length}} <span class="caret"></span></button>
-            <ul class="dropdown-menu">
-               {% for link in concept["practice"] %}
-               <li>{% if 'url' in link.keys() %}<a href="http://{{ link["url"] }}" target="_blank">{{ link["title"] }}</a>{% else %}{{link["title"]}}{% endif %}</li>
-               {% endfor %}
-               {% for link in concept["demos"] %}
-               <li><a href="http://{{ link["url"] }}" target="_blank">{{ link["title"] }}</a></li>
-               {% endfor %}
-            </ul>
-         </div>
-      </td>
-   </tr>
+<div class="accordion">
+   {% for conceptObj in conceptObjs %}
+   {% if conceptObj["question"] %}
+   <h3>{{ conceptObj["question"] }}</h3>
+   <div>
+      {% for answerObj in conceptObj["demos"] %}
+      <a href="http://{{answerObj['url']}}" target="_blank">{{answerObj['title']}}</a>
+      {% endfor %}
+   </div>
+   {% endif %}
    {% endfor %}
-</table>
+</div>
+
+<script>
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+    acc[i].onclick = function(){
+        this.classList.toggle("active");
+        this.nextElementSibling.classList.toggle("show");
+  }
+}
+</script>
