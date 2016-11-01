@@ -20,7 +20,7 @@ var subTopics = {
 		//'object oriented programming'
 	],
 	"interview questions" : [
-		'back-end developer',
-		'front-end Developer'
+		'back end developer',
+		//'front-end Developer'
 	]
 };

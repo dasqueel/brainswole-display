@@ -1,6 +1,6 @@
 import sys
-sys.path.append('/Users/squeel/sites/brainswole/imports')
-#sys.path.append('/home/ubuntu/brainswole/imports')
+#sys.path.append('/Users/squeel/sites/brainswole/imports')
+sys.path.append('/home/ubuntu/brainswole/imports')
 from pymongo import MongoClient
 from courseConcepts import *
 
@@ -9,7 +9,7 @@ client = MongoClient('localhost')
 conceptsDb = client.Concepts
 generalDb = client.ArchiveGeneral
 
-name = 'Back-End Developer Interview Questions'
+name = 'back end developer'
 concepts = courseConcepts[name]
 
 doc = {'name':name,'concepts':concepts,'whyLinks':[]}

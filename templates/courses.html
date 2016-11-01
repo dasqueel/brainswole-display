@@ -65,7 +65,12 @@ function changeFunc() {
 function changeFuncSub() {
   var selectBox = document.getElementById("selectBoxSub");
   var selectedValue = selectBox.options[selectBox.selectedIndex].value;
-  window.open('course/'+selectedValue,'_self',false);
+  if (selectedValue == 'back end developer') {
+    window.open('questions/'+selectedValue,'_self',false);
+  }
+  else {
+    window.open('course/'+selectedValue,'_self',false);
+  }
 }
 
 </script>

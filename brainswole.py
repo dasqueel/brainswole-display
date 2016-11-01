@@ -273,6 +273,7 @@ def unauthorized_handler():
 def home():
     return render_template('home.html')
 
+#do i need this?
 @app.route('/result')
 @flask_login.login_required
 def result():
@@ -373,7 +374,7 @@ def backQuestion():
 
     else:
         #user hasnt created a userQuestionDoc, create one and insert the url
-        ##### recreate when creating other interview questionaires
+        #####!!!! recreate when creating other interview questionaires
         newUserQuestionDoc = {'question':question,'courses':['back end developer'],'demos':[newLinkObj],'lastVisit':datetime.datetime.utcnow()}
 
         #add course(s) the concept its part of ** could redo this more efficiently  **

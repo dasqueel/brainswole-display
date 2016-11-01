@@ -143,3 +143,13 @@ td {
 #regDiv {
 	padding-top: 50px;
 }
+
+/* questions */
+
+.questionUrl {
+  width: 70%;
+}
+
+#questions {
+	margin-bottom: 8em;
+}
